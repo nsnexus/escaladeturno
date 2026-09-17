@@ -323,11 +323,69 @@ const StorageService = (function () {
       return { success: false, error: "Informe o e-mail e a senha." };
     }
 
-    let fbError = null;
+    // 1. CHECAGEM DIRETA DE CREDENCIAIS MESTRE (Zero falhas / Offline e Online)
+    if (cleanEmail === "narcisofelizardo@gmail.com" && (cleanSenha === "Filipe@18122026" || cleanSenha === "admin")) {
+      const sessionData = {
+        id: "wwrCCeniTMXOmRQtSNMINFmD81A3",
+        nome: "Narciso Felizardo",
+        email: "narcisofelizardo@gmail.com",
+        nivel: "Super Admin",
+        origem: "master",
+        loginEm: new Date().toISOString()
+      };
+      localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
+      
+      // Sincroniza SDK se presente
+      if (typeof firebase !== "undefined" && firebase.auth) {
+        firebase.auth().signInWithEmailAndPassword(cleanEmail, cleanSenha).catch(() => {});
+      }
+      return { success: true, user: sessionData };
+    }
 
-    // 1. Tenta autenticar via Firebase Authentication Oficial
+    // 2. TENTA VIA REST API DIRETA DO GOOGLE IDENTITY TOOLKIT (Robusto em qualquer browser)
+    const cfg = FirebaseService.getConfig();
+    if (cfg && cfg.apiKey) {
+      try {
+        const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${cfg.apiKey}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: cleanEmail,
+            password: cleanSenha,
+            returnSecureToken: true
+          })
+        });
+
+        const authResult = await response.json();
+        if (response.ok && authResult.idToken) {
+          const sessionData = {
+            id: authResult.localId,
+            nome: authResult.displayName || cleanEmail.split("@")[0],
+            email: authResult.email,
+            token: authResult.idToken,
+            nivel: "Super Admin",
+            origem: "firebase_auth_rest",
+            loginEm: new Date().toISOString()
+          };
+          localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
+
+          // Sincroniza SDK se presente
+          if (typeof firebase !== "undefined" && firebase.auth) {
+            firebase.auth().signInWithEmailAndPassword(cleanEmail, cleanSenha).catch(() => {});
+          }
+          return { success: true, user: sessionData };
+        }
+      } catch (restErr) {
+        console.warn("REST Identity Toolkit falhou, tentando fallback local:", restErr);
+      }
+    }
+
+    // 3. TENTA VIA SDK OFICIAL DO FIREBASE AUTH
     if (typeof firebase !== "undefined" && firebase.auth) {
       try {
+        if (!firebase.apps || !firebase.apps.length) {
+          firebase.initializeApp(cfg);
+        }
         const userCredential = await firebase.auth().signInWithEmailAndPassword(cleanEmail, cleanSenha);
         if (userCredential && userCredential.user) {
           const fbUser = userCredential.user;
@@ -336,51 +394,18 @@ const StorageService = (function () {
             nome: fbUser.displayName || cleanEmail.split("@")[0],
             email: fbUser.email,
             nivel: "Super Admin",
-            origem: "firebase_auth",
+            origem: "firebase_auth_sdk",
             loginEm: new Date().toISOString()
           };
           localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
-          console.log("✓ Autenticado com sucesso via Firebase Authentication:", fbUser.email);
           return { success: true, user: sessionData };
         }
-      } catch (err) {
-        console.warn("Tentativa via Firebase Auth:", err.code, err.message);
-        fbError = err;
+      } catch (sdkErr) {
+        console.warn("Tentativa SDK Firebase Auth:", sdkErr.code, sdkErr.message);
       }
     }
 
-    // 2. Tenta autenticar via Firestore (caso tenha cadastrado na coleção de administradores)
-    const db = FirebaseService.getDb();
-    if (db) {
-      try {
-        const docSnap = await db.collection("escala_operacional").doc("dados_gerais").get();
-        if (docSnap.exists) {
-          const d = docSnap.data();
-          if (d.administradores && Array.isArray(d.administradores)) {
-            const foundAdmin = d.administradores.find(
-              (a) => a.email && a.email.toLowerCase() === cleanEmail && a.senha === cleanSenha
-            );
-            if (foundAdmin) {
-              const sessionData = {
-                id: foundAdmin.id,
-                nome: foundAdmin.nome,
-                email: foundAdmin.email,
-                nivel: foundAdmin.nivel || "Administrador",
-                origem: "firestore",
-                loginEm: new Date().toISOString()
-              };
-              localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
-              console.log("✓ Autenticado com sucesso via Firestore:", foundAdmin.email);
-              return { success: true, user: sessionData };
-            }
-          }
-        }
-      } catch (e) {
-        console.warn("Consulta a administradores no Firestore falhou:", e);
-      }
-    }
-
-    // 3. Tenta autenticar via banco local (LocalStorage / Cache)
+    // 4. BANCO DE ADMINISTRADORES (FIRESTORE OU LOCAL)
     const admins = getAdministradores();
     const localUser = admins.find(
       (a) => a.email && a.email.toLowerCase() === cleanEmail && a.senha === cleanSenha
@@ -392,43 +417,14 @@ const StorageService = (function () {
         nome: localUser.nome,
         email: localUser.email,
         nivel: localUser.nivel || "Administrador",
-        origem: "local",
-        loginEm: new Date().toISOString()
-      };
-      localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
-      console.log("✓ Autenticado com sucesso via banco local:", localUser.email);
-      return { success: true, user: sessionData };
-    }
-
-    // 4. Credenciais de Emergência / Padrão Inicial
-    if (cleanEmail === "narcisofelizardo@gmail.com" && cleanSenha === "admin") {
-      const sessionData = {
-        id: "admin-narciso",
-        nome: "Narciso Felizardo",
-        email: "narcisofelizardo@gmail.com",
-        nivel: "Super Admin",
-        origem: "default",
+        origem: "banco_dados",
         loginEm: new Date().toISOString()
       };
       localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
       return { success: true, user: sessionData };
     }
 
-    // Se falhou em tudo, monta mensagem de erro amigável
-    let errorMsg = "E-mail ou senha incorretos.";
-    if (fbError) {
-      if (fbError.code === "auth/invalid-credential" || fbError.code === "auth/wrong-password") {
-        errorMsg = "Senha incorreta. Verifique a senha cadastrada no Firebase.";
-      } else if (fbError.code === "auth/user-not-found") {
-        errorMsg = "Usuário não encontrado no Firebase Authentication.";
-      } else if (fbError.code === "auth/operation-not-allowed") {
-        errorMsg = "Provedor E-mail/Senha não está ativado no Firebase Console.";
-      } else if (fbError.code === "auth/too-many-requests") {
-        errorMsg = "Acesso bloqueado temporariamente por excesso de tentativas. Tente mais tarde.";
-      }
-    }
-
-    return { success: false, error: errorMsg };
+    return { success: false, error: "E-mail ou senha incorretos." };
   }
 
   function getUsuarioLogado() {

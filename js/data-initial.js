@@ -722,7 +722,7 @@ const INITIAL_DATA = {
       id: "admin-narciso",
       nome: "Narciso Felizardo",
       email: "narcisofelizardo@gmail.com",
-      senha: "admin", // Senha inicial de acesso
+      senha: "Filipe@18122026", // Senha cadastrada no Firebase
       nivel: "Super Admin",
       criadoEm: "2026-09-17T19:00:00.000Z"
     }

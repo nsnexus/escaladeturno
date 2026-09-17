@@ -93,6 +93,15 @@ const FirebaseService = (function () {
     listeners.forEach((cb) => cb(connected, message));
   }
 
+  // Auto-inicialização imediata
+  if (typeof window !== "undefined") {
+    if (typeof firebase !== "undefined") {
+      initFirebase();
+    } else {
+      window.addEventListener("DOMContentLoaded", () => initFirebase());
+    }
+  }
+
   return {
     getConfig,
     saveConfig,
