@@ -1,0 +1,158 @@
+/**
+ * LANDING.JS - CONTROLADOR DA LANDING PAGE CORPORATIVA
+ * Gerencia o alternador de temas, consulta rápida de escalas e persistência do colaborador no celular.
+ */
+
+document.addEventListener("DOMContentLoaded", () => {
+  // 1. Alternador de Tema (Claro / Escuro)
+  const btnThemeToggle = document.getElementById("btnThemeToggleLanding");
+  function updateThemeButtonIcon(theme) {
+    if (btnThemeToggle) {
+      btnThemeToggle.textContent = theme === "dark" ? "☀️" : "🌙";
+    }
+  }
+
+  const currentTheme = document.documentElement.getAttribute("data-theme") || "dark";
+  updateThemeButtonIcon(currentTheme);
+
+  if (btnThemeToggle) {
+    btnThemeToggle.addEventListener("click", () => {
+      const active = document.documentElement.getAttribute("data-theme") || "dark";
+      const nextTheme = active === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", nextTheme);
+      localStorage.setItem("escala_theme", nextTheme);
+      updateThemeButtonIcon(nextTheme);
+    });
+  }
+
+  // 2. Elementos do Widget de Consulta Rápida
+  const colabSelect = document.getElementById("landingColabSelect");
+  const resultBox = document.getElementById("landingResultBox");
+  const btnSalvarMeuPerfil = document.getElementById("btnSalvarMeuPerfilLanding");
+  const savedNotice = document.getElementById("landingSavedNotice");
+
+  if (!colabSelect || !resultBox) return;
+
+  // Carregar lista de colaboradores
+  const colaboradores = StorageService.getColaboradores();
+  const sortedColabs = [...colaboradores].sort((a, b) => a.nome.localeCompare(b.nome));
+
+  sortedColabs.forEach((c) => {
+    const opt = document.createElement("option");
+    opt.value = c.id;
+    const areaLabel = c.area === "sossego" ? "Sossego" : "Salobo";
+    opt.textContent = `${c.nome} (${areaLabel} • ${c.cargo})`;
+    colabSelect.appendChild(opt);
+  });
+
+  // Função para exibir detalhes do colaborador
+  function displayColabQuickDetails(colabId) {
+    if (!colabId) {
+      resultBox.innerHTML = `
+        <div style="text-align: center; color: var(--text-muted);">
+          <div style="font-size: 2.2rem; margin-bottom: 8px;">👤</div>
+          <p style="font-size: 0.95rem;">Selecione seu nome no menu ao lado para exibir seus detalhes de turno.</p>
+        </div>
+      `;
+      return;
+    }
+
+    const colab = colaboradores.find((c) => c.id === colabId);
+    if (!colab) return;
+
+    const today = new Date();
+    const statusResult = StorageService.getStatusDia(colab, today);
+    const emTurnoHoje = statusResult.emTurno;
+
+    // Buscar alocação de caminhão
+    const caminhoes = StorageService.getCaminhoes();
+    const camAlocado = caminhoes.find(
+      (cam) =>
+        cam.motoristaId === colab.id ||
+        cam.ajudanteId === colab.id ||
+        cam.motoristaNoturnoId === colab.id ||
+        cam.ajudanteNoturnoId === colab.id
+    );
+
+    const initials = colab.nome
+      .split(" ")
+      .slice(0, 2)
+      .map((w) => w[0])
+      .join("")
+      .toUpperCase();
+
+    const areaName = colab.area === "sossego" ? "Sossego (3 Caminhões)" : "Salobo (4 Caminhões)";
+
+    resultBox.innerHTML = `
+      <div style="display:flex; align-items:flex-start; gap:16px;">
+        <div style="width:52px; height:52px; border-radius:50%; background:var(--grad-cyan); color:#080c14; font-weight:800; font-size:1.15rem; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+          ${initials}
+        </div>
+        <div style="flex:1;">
+          <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:4px;">
+            <h4 style="font-family:var(--font-heading); font-size:1.15rem; font-weight:700; color:var(--text-main); margin:0;">
+              ${colab.nome}
+            </h4>
+            <span class="badge ${emTurnoHoje ? "badge-emerald" : "badge-purple"}" style="font-size:0.8rem; font-weight:700;">
+              ${emTurnoHoje ? "● EM TURNO HOJE" : "○ EM FOLGA / DESCANSO"}
+            </span>
+          </div>
+
+          <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px;">
+            ${colab.cargo} • Matrícula: <strong>${colab.matricula || "N/D"}</strong>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:10px; padding:12px; border-radius:8px; background:rgba(255,255,255,0.04); border:1px solid var(--border-subtle);">
+            <div>
+              <div style="font-size:0.72rem; color:var(--text-dim); text-transform:uppercase;">Regime de Escala</div>
+              <div style="font-size:0.88rem; font-weight:600; color:var(--text-main);">${colab.regime} ${colab.turma ? `(Turma ${colab.turma})` : ""}</div>
+            </div>
+            <div>
+              <div style="font-size:0.72rem; color:var(--text-dim); text-transform:uppercase;">Turno Padrão</div>
+              <div style="font-size:0.88rem; font-weight:600; color:var(--text-main);">${colab.turnoPadrao || "Geral"}</div>
+            </div>
+            <div>
+              <div style="font-size:0.72rem; color:var(--text-dim); text-transform:uppercase;">Base Operacional</div>
+              <div style="font-size:0.88rem; font-weight:600; color:var(--cyan-neon);">${areaName}</div>
+            </div>
+            <div>
+              <div style="font-size:0.72rem; color:var(--text-dim); text-transform:uppercase;">Caminhão Designado</div>
+              <div style="font-size:0.88rem; font-weight:600; color:var(--text-main);">
+                ${camAlocado ? `Caminhão ${camAlocado.numero}` : "Apoio Geral / ADM"}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Verificar se usuário já tem perfil salvo localmente
+  const savedColabId = localStorage.getItem("escala_meu_colaborador_id");
+  if (savedColabId && colaboradores.some((c) => c.id === savedColabId)) {
+    colabSelect.value = savedColabId;
+    displayColabQuickDetails(savedColabId);
+  }
+
+  colabSelect.addEventListener("change", (e) => {
+    displayColabQuickDetails(e.target.value);
+    if (savedNotice) savedNotice.style.display = "none";
+  });
+
+  if (btnSalvarMeuPerfil) {
+    btnSalvarMeuPerfil.addEventListener("click", () => {
+      const selectedId = colabSelect.value;
+      if (!selectedId) {
+        alert("Por favor, selecione seu nome na lista para salvar seu perfil.");
+        return;
+      }
+      localStorage.setItem("escala_meu_colaborador_id", selectedId);
+      if (savedNotice) {
+        savedNotice.style.display = "block";
+        setTimeout(() => {
+          savedNotice.style.display = "none";
+        }, 4000);
+      }
+    });
+  }
+});

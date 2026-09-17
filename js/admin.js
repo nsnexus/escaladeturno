@@ -49,18 +49,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const cycleBaseDate = document.getElementById("cycleBaseDate");
   const btnSaveCycleConfig = document.getElementById("btnSaveCycleConfig");
 
-  // Elementos do Firebase
-  const firebaseConfigForm = document.getElementById("firebaseConfigForm");
-  const fbApiKey = document.getElementById("fbApiKey");
-  const fbAuthDomain = document.getElementById("fbAuthDomain");
-  const fbProjectId = document.getElementById("fbProjectId");
-  const fbStorageBucket = document.getElementById("fbStorageBucket");
-  const fbMessagingSenderId = document.getElementById("fbMessagingSenderId");
-  const fbAppId = document.getElementById("fbAppId");
-  const btnSyncToCloud = document.getElementById("btnSyncToCloud");
-  const firebaseStatusIndicator = document.getElementById("firebaseStatusIndicator");
-  const footerStatusBadge = document.getElementById("footerStatusBadge");
-
   // Backup e Restauração
   const btnExportBackup = document.getElementById("btnExportBackup");
   const btnImportBackup = document.getElementById("btnImportBackup");

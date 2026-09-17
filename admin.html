@@ -6,9 +6,12 @@
   <title>Painel Administrativo • Gestão de Escala e Efetivo</title>
   <meta name="description" content="Painel de controle e administração de colaboradores, caminhões e regras de escala operacional.">
   
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="css/style.css?v=2.2">
+  <link rel="stylesheet" href="css/admin.css?v=2.2">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <!-- Script anti-flicker de tema -->
   <script>
     (function() {
@@ -28,7 +31,7 @@
         <div class="brand-info">
           <h1>
             PAINEL ADMINISTRATIVO DE GESTÃO
-            <span class="status-dot" style="background: var(--amber-neon); box-shadow: 0 0 10px var(--amber-neon);"></span>
+            <span class="status-dot" style="background: var(--amber-neon);"></span>
           </h1>
           <div class="subtitle">
             <span>Controle de Efetivo</span> • <span>Alocação de Caminhões</span> • <span>Ajuste Fino de Escalas</span>
@@ -40,19 +43,12 @@
         <span id="adminUserGreeting" style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; gap: 6px;">
           👤 <span id="adminUserEmailDisplay">narcisofelizardo@gmail.com</span>
         </span>
-        <a href="index.html" class="btn btn-glass" title="Voltar para a tela de monitoramento público / TV">
-          📺 Ver Painel TV
+        <a href="landing.html" class="btn btn-glass" title="Página Inicial de Apresentação">
+          🏠 Início
         </a>
-        <button class="btn btn-glass" id="btnExportBackup" title="Baixar arquivo JSON com todos os dados do sistema">
-          💾 Backup JSON
-        </button>
-        <button class="btn btn-glass" id="btnImportBackup" title="Carregar arquivo de backup JSON">
-          📂 Restaurar Backup
-        </button>
-        <input type="file" id="backupFileInput" accept=".json" style="display:none;">
-        <button class="btn btn-cyan" id="btnResetOriginal" title="Restaura os 36 colaboradores e frotas das planilhas oficiais Sossego e Salobo">
-          ↺ Restaurar Dados Originais
-        </button>
+        <a href="index.html" class="btn btn-glass" title="Ir para o Quadro de Escala Operacional">
+          📋 Escala Operacional
+        </a>
         <button class="btn btn-glass" id="btnLogout" title="Encerrar sessão de administrador" style="color: var(--coral-neon);">
           🚪 Sair
         </button>
@@ -91,6 +87,12 @@
           <span class="nav-icon">🔑</span>
           <span>Administradores</span>
           <span class="nav-badge" id="navBadgeAdmins">1</span>
+        </button>
+
+        <button class="admin-nav-item" data-tab="tab-backup">
+          <span class="nav-icon">💾</span>
+          <span>Backup & Dados</span>
+          <span class="nav-badge">Sistema</span>
         </button>
       </aside>
 
@@ -295,6 +297,82 @@
           </div>
         </div>
 
+        <!-- ==================== ABA 5: BACKUP E DADOS DO SISTEMA ==================== -->
+        <div class="admin-tab-pane" id="tab-backup">
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <h2>💾 Backup & Manutenção de Dados</h2>
+              <span class="section-badge">SEGURANÇA & NUVEM</span>
+            </div>
+
+            <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:24px;">
+              Gerencie backups locais em formato JSON ou restaure os dados padrão importados das planilhas oficiais de Sossego e Salobo. Todas as alterações são sincronizadas automaticamente com o banco de dados em nuvem.
+            </p>
+
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:20px;">
+              
+              <!-- Card 1: Baixar Backup -->
+              <div class="scale-adjust-box" style="display:flex; flex-direction:column; justify-content:space-between;">
+                <div>
+                  <h3 style="font-size:1.05rem; margin-bottom:8px; color:var(--cyan-neon);">
+                    📥 Cópia de Segurança (Download JSON)
+                  </h3>
+                  <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:16px;">
+                    Exporta todo o cadastro de colaboradores, alocações de caminhões, exceções de escala e administradores em um único arquivo .json.
+                  </p>
+                </div>
+                <button class="btn btn-glass" id="btnExportBackup" style="width:100%; justify-content:center;">
+                  💾 Baixar Backup JSON
+                </button>
+              </div>
+
+              <!-- Card 2: Restaurar Backup -->
+              <div class="scale-adjust-box" style="display:flex; flex-direction:column; justify-content:space-between;">
+                <div>
+                  <h3 style="font-size:1.05rem; margin-bottom:8px; color:var(--emerald-neon);">
+                    📂 Restaurar Arquivo de Backup
+                  </h3>
+                  <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:16px;">
+                    Carrega um arquivo JSON previamente exportado. Os dados serão restaurados imediatamente e propagados para a nuvem.
+                  </p>
+                </div>
+                <div>
+                  <button class="btn btn-glass" id="btnImportBackup" style="width:100%; justify-content:center;">
+                    📂 Carregar Backup JSON
+                  </button>
+                  <input type="file" id="backupFileInput" accept=".json" style="display:none;">
+                </div>
+              </div>
+
+              <!-- Card 3: Restaurar Planilhas Originais -->
+              <div class="scale-adjust-box" style="display:flex; flex-direction:column; justify-content:space-between;">
+                <div>
+                  <h3 style="font-size:1.05rem; margin-bottom:8px; color:var(--amber-neon);">
+                    ↺ Restaurar Dados Originais de Fábrica
+                  </h3>
+                  <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:16px;">
+                    Restaura os 36 colaboradores e frotas originais das planilhas oficiais Sossego e Salobo (redefinição limpa do sistema).
+                  </p>
+                </div>
+                <button class="btn btn-cyan" id="btnResetOriginal" style="width:100%; justify-content:center;">
+                  ↺ Restaurar Planilhas Oficiais
+                </button>
+              </div>
+
+            </div>
+
+            <div style="margin-top:24px; padding:16px; border-radius:10px; background: rgba(0, 229, 255, 0.05); border: 1px solid rgba(0, 229, 255, 0.2);">
+              <div style="font-size:0.85rem; font-weight:600; color:var(--cyan-neon); margin-bottom:6px;">
+                ☁️ Sincronização em Nuvem (Firebase Cloud Firestore)
+              </div>
+              <div style="font-size:0.8rem; color:var(--text-muted);">
+                A sincronização é 100% automática e em tempo real no projeto <strong style="color:var(--text-main);">escala-4e21c</strong>. Qualquer inclusão ou alteração feita neste painel reflete instantaneamente nos celulares dos operadores e nas telas da operação.
+              </div>
+            </div>
+
+          </div>
+        </div>
+
       </main>
     </div>
 
@@ -465,6 +543,10 @@
           <button type="button" class="btn btn-glass" id="btnCancelModalCam">Cancelar</button>
           <button type="submit" class="btn btn-cyan">Salvar Caminhão</button>
         </div>
+      </form>
+    </div>
+  </div>
+
   <!-- ==================== MODAL DE ADMINISTRADOR (CRIAR / EDITAR) ==================== -->
   <div class="modal-backdrop" id="modalAdmin">
     <div class="modal-content" style="max-width: 480px;">
@@ -551,9 +633,9 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
   <!-- Scripts -->
-  <script src="js/data-initial.js"></script>
-  <script src="js/firebase-config.js"></script>
-  <script src="js/storage.js"></script>
-  <script src="js/admin.js"></script>
+  <script src="js/data-initial.js?v=2.2"></script>
+  <script src="js/firebase-config.js?v=2.2"></script>
+  <script src="js/storage.js?v=2.2"></script>
+  <script src="js/admin.js?v=2.2"></script>
 </body>
 </html>
