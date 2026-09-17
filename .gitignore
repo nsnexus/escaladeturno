@@ -1,0 +1,9 @@
+# Ambientes e Dependências Locais
+node_modules/
+.DS_Store
+Thumbs.db
+*.log
+
+# Backups temporários
+scratch/
+*.tmp

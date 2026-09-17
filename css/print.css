@@ -1,0 +1,180 @@
+/* ==========================================================================
+   ESTILOS DE IMPRESSÃO / EXPORTAÇÃO PDF (print.css)
+   Otimizado para folhas A4 / A3, murais de operações e assinaturas
+   ========================================================================== */
+
+@media print {
+  /* Força cores claras e remove fundos pesados */
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 9pt !important;
+  }
+
+  body::before {
+    display: none !important;
+  }
+
+  .app-container {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Oculta elementos interativos que não devem sair na impressão */
+  .top-navbar .top-actions,
+  .filter-control-bar,
+  .calendar-top-controls .btn,
+  .modal-backdrop,
+  .toast-container,
+  .page-footer,
+  .btn,
+  .admin-sidebar,
+  .search-box,
+  .table-actions-cell {
+    display: none !important;
+  }
+
+  /* Cabeçalho Oficial para Impressão */
+  .top-navbar {
+    background: none !important;
+    border: none !important;
+    border-bottom: 2px solid #000000 !important;
+    border-radius: 0 !important;
+    padding: 10px 0 !important;
+    margin-bottom: 15px !important;
+    display: block !important;
+  }
+
+  .brand-section {
+    display: flex !important;
+    align-items: center !important;
+    gap: 15px !important;
+  }
+
+  .brand-logo-badge {
+    background: #000 !important;
+    color: #fff !important;
+    box-shadow: none !important;
+    border: 1px solid #000 !important;
+  }
+
+  .brand-info h1 {
+    font-size: 16pt !important;
+    color: #000 !important;
+    -webkit-text-fill-color: initial !important;
+  }
+
+  .live-clock-card {
+    display: none !important;
+  }
+
+  /* Cards e Grids */
+  .stat-card,
+  .truck-card,
+  .roster-card,
+  .schedule-calendar-section {
+    background: #ffffff !important;
+    border: 1px solid #cccccc !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+    border-radius: 4px !important;
+  }
+
+  .trucks-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .truck-number-badge {
+    background: #f0f0f0 !important;
+    color: #000000 !important;
+    border: 1px solid #999999 !important;
+  }
+
+  .crew-box {
+    background: #f9f9f9 !important;
+    border: 1px solid #e0e0e0 !important;
+  }
+
+  .badge-mina {
+    background: #e0e0e0 !important;
+    color: #000000 !important;
+    border: 1px solid #999999 !important;
+  }
+
+  /* Tabela de Escala Mensal */
+  .table-responsive-wrapper {
+    background: #ffffff !important;
+    border: 1px solid #000000 !important;
+    overflow: visible !important;
+  }
+
+  .schedule-table {
+    font-size: 7.5pt !important;
+    color: #000000 !important;
+  }
+
+  .schedule-table th,
+  .schedule-table td {
+    border: 1px solid #cccccc !important;
+    padding: 4px 6px !important;
+    color: #000000 !important;
+  }
+
+  .schedule-table th {
+    background: #eeeeee !important;
+  }
+
+  .schedule-table th.col-colab,
+  .schedule-table td.col-colab {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .cell-t {
+    background: #d4edda !important;
+    color: #155724 !important;
+    font-weight: bold;
+  }
+
+  .cell-f {
+    background: #f8f9fa !important;
+    color: #6c757d !important;
+  }
+
+  .cell-fe {
+    background: #e2d9f3 !important;
+    color: #381272 !important;
+  }
+
+  .cell-at {
+    background: #fff3cd !important;
+    color: #856404 !important;
+  }
+
+  /* Campo de Assinaturas de Gestão no Rodapé da Impressão */
+  .print-signatures {
+    display: flex !important;
+    justify-content: space-around;
+    margin-top: 40px;
+    padding-top: 20px;
+    page-break-inside: avoid;
+  }
+
+  .signature-box {
+    text-align: center;
+    width: 260px;
+  }
+
+  .signature-line {
+    border-top: 1px solid #000000;
+    margin-bottom: 5px;
+  }
+
+  .signature-title {
+    font-size: 8pt;
+    font-weight: bold;
+  }
+}

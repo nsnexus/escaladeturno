@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Administrativo • Gestão de Escala e Efetivo</title>
+  <meta name="description" content="Painel de controle e administração de colaboradores, caminhões e regras de escala operacional.">
+  
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
+</head>
+<body>
+
+  <div class="app-container">
+
+    <!-- ==================== HEADER DO ADMIN ==================== -->
+    <header class="top-navbar">
+      <div class="brand-section">
+        <div class="brand-logo-badge" style="background: var(--grad-amber);">⚙️</div>
+        <div class="brand-info">
+          <h1>
+            PAINEL ADMINISTRATIVO DE GESTÃO
+            <span class="status-dot" style="background: var(--amber-neon); box-shadow: 0 0 10px var(--amber-neon);"></span>
+          </h1>
+          <div class="subtitle">
+            <span>Controle de Efetivo</span> • <span>Alocação de Caminhões</span> • <span>Ajuste Fino de Escalas</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <a href="index.html" class="btn btn-glass" title="Voltar para a tela de monitoramento público / TV">
+          📺 Ver Painel TV
+        </a>
+        <button class="btn btn-glass" id="btnExportBackup" title="Baixar arquivo JSON com todos os dados do sistema">
+          💾 Backup JSON
+        </button>
+        <button class="btn btn-glass" id="btnImportBackup" title="Carregar arquivo de backup JSON">
+          📂 Restaurar Backup
+        </button>
+        <input type="file" id="backupFileInput" accept=".json" style="display:none;">
+        <button class="btn btn-cyan" id="btnResetOriginal" title="Restaura os 36 colaboradores e frotas das planilhas oficiais Sossego e Salobo">
+          ↺ Restaurar Dados Originais
+        </button>
+      </div>
+    </header>
+
+    <!-- ==================== LAYOUT DO ADMIN (SIDEBAR + CONTEÚDO) ==================== -->
+    <div class="admin-layout">
+
+      <!-- Sidebar com Abas -->
+      <aside class="admin-sidebar">
+        <div class="sidebar-title">Módulos de Gestão</div>
+        
+        <button class="admin-nav-item active" data-tab="tab-efetivo">
+          <span class="nav-icon">👥</span>
+          <span>Efetivo & Equipe</span>
+          <span class="nav-badge" id="navBadgeEfetivo">36</span>
+        </button>
+
+        <button class="admin-nav-item" data-tab="tab-caminhoes">
+          <span class="nav-icon">🚛</span>
+          <span>Frotas & Caminhões</span>
+          <span class="nav-badge" id="navBadgeCaminhoes">7</span>
+        </button>
+
+        <button class="admin-nav-item" data-tab="tab-escalas">
+          <span class="nav-icon">📅</span>
+          <span>Ajuste de Escalas</span>
+          <span class="nav-badge">3x3 / ADM</span>
+        </button>
+
+        <button class="admin-nav-item" data-tab="tab-firebase">
+          <span class="nav-icon">☁️</span>
+          <span>Nuvem & Firebase</span>
+          <span class="nav-badge" id="navBadgeFirebase">Config</span>
+        </button>
+      </aside>
+
+      <!-- Conteúdo Principal do Admin -->
+      <main class="admin-main-content">
+
+        <!-- ==================== ABA 1: GESTÃO DE EFETIVO ==================== -->
+        <div class="admin-tab-pane active" id="tab-efetivo">
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <h2>👥 Colaboradores Cadastrados</h2>
+              <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button class="btn btn-glass" id="btnExportCsv">📥 Exportar CSV</button>
+                <button class="btn btn-cyan" id="btnNovoColaborador">+ Novo Colaborador</button>
+              </div>
+            </div>
+
+            <!-- Controles e Filtros de Efetivo -->
+            <div class="admin-table-controls">
+              <div class="area-tabs">
+                <button class="area-tab active" data-admin-area="todas">Todas</button>
+                <button class="area-tab" data-admin-area="sossego">Sossego (18)</button>
+                <button class="area-tab" data-admin-area="salobo">Salobo (18)</button>
+              </div>
+              <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="adminSearchInput" class="search-input" placeholder="Filtrar por nome, cargo ou situação...">
+              </div>
+            </div>
+
+            <!-- Tabela de Colaboradores -->
+            <div class="table-responsive-wrapper">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Colaborador</th>
+                    <th>Cargo</th>
+                    <th>Área</th>
+                    <th>Regime / Situação</th>
+                    <th>Carteira Mina</th>
+                    <th>Status</th>
+                    <th style="text-align:center;">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="adminColaboradoresTableBody">
+                  <!-- Renderizado dinamicamente pelo admin.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== ABA 2: FROTAS & CAMINHÕES ==================== -->
+        <div class="admin-tab-pane" id="tab-caminhoes">
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <h2>🚛 Gestão de Caminhões & Duplas Operacionais</h2>
+              <button class="btn btn-cyan" id="btnNovoCaminhao">+ Novo Caminhão</button>
+            </div>
+
+            <div style="margin-bottom:16px; color:var(--text-muted); font-size:0.88rem;">
+              Configure a alocação de <strong>Motoristas</strong> e <strong>Ajudantes</strong> para cada caminhão.
+              O sistema sinaliza automaticamente habilitações como <strong>Carteira Mina</strong>.
+            </div>
+
+            <div class="truck-admin-grid" id="adminTrucksGrid">
+              <!-- Renderizado dinamicamente pelo admin.js -->
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== ABA 3: AJUSTE DE ESCALAS & CICLOS ==================== -->
+        <div class="admin-tab-pane" id="tab-escalas">
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <h2>📅 Configuração de Ciclos & Trocas de Turno</h2>
+            </div>
+
+            <!-- Ferramenta 1: Troca Rápida de Turno (Swap) -->
+            <div class="scale-adjust-box">
+              <h3 style="font-size:1.05rem; margin-bottom:12px; color:var(--cyan-neon);">
+                ⚡ Troca Rápida de Turno (Permuta / Swap)
+              </h3>
+              <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:16px;">
+                Permuta instantaneamente a escala entre dois colaboradores para uma data selecionada.
+              </p>
+
+              <div class="swap-grid">
+                <div class="form-group">
+                  <label class="form-label">Colaborador 1</label>
+                  <select id="swapColab1" class="form-control">
+                    <!-- Opções dinâmicas -->
+                  </select>
+                </div>
+
+                <div style="text-align:center;">
+                  <label class="form-label">Data da Troca</label>
+                  <input type="date" id="swapDate" class="form-control" style="margin-bottom:10px;">
+                  <button class="swap-btn-icon" id="btnExecuteSwap" title="Executar Permuta de Escala">⇄</button>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Colaborador 2</label>
+                  <select id="swapColab2" class="form-control">
+                    <!-- Opções dinâmicas -->
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ferramenta 2: Lançamento de Exceção Individual (Folga, Férias, Atestado) -->
+            <div class="scale-adjust-box">
+              <h3 style="font-size:1.05rem; margin-bottom:12px; color:var(--emerald-neon);">
+                📝 Lançamento de Exceção Pontual na Escala
+              </h3>
+              <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:16px;">
+                Altere o status de um colaborador específico em uma data (ex: Folga compensatória, Atestado médico, Férias).
+              </p>
+
+              <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:14px; align-items:flex-end;">
+                <div class="form-group" style="margin-bottom:0;">
+                  <label class="form-label">Colaborador</label>
+                  <select id="exceptionColab" class="form-control">
+                    <!-- Opções dinâmicas -->
+                  </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom:0;">
+                  <label class="form-label">Data</label>
+                  <input type="date" id="exceptionDate" class="form-control">
+                </div>
+
+                <div class="form-group" style="margin-bottom:0;">
+                  <label class="form-label">Novo Status no Dia</label>
+                  <select id="exceptionStatus" class="form-control">
+                    <option value="AUTO">Restaurar Automático (Padrão 3x3/ADM)</option>
+                    <option value="T">Trabalho (T)</option>
+                    <option value="F">Folga (F)</option>
+                    <option value="FE">Férias (FE)</option>
+                    <option value="AT">Atestado Médico (AT)</option>
+                    <option value="TR">Treinamento (TR)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <button class="btn btn-cyan" id="btnApplyException" style="width:100%;">
+                    Aplicar Ajuste
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ferramenta 3: Configuração do Ciclo 3x3 Base -->
+            <div class="scale-adjust-box">
+              <h3 style="font-size:1.05rem; margin-bottom:12px; color:var(--amber-neon);">
+                ⚙️ Parâmetros do Ciclo 3x3
+              </h3>
+              <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:14px; align-items:flex-end;">
+                <div class="form-group" style="margin-bottom:0;">
+                  <label class="form-label">Data Base de Início do Ciclo 3x3</label>
+                  <input type="date" id="cycleBaseDate" class="form-control">
+                </div>
+                <div>
+                  <button class="btn btn-glass" id="btnSaveCycleConfig">
+                    Salvar Data Base do Ciclo
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ==================== ABA 4: FIREBASE & NUVEM ==================== -->
+        <div class="admin-tab-pane" id="tab-firebase">
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <h2>☁️ Conexão Firebase Firestore</h2>
+              <span id="firebaseStatusIndicator" class="cloud-status-indicator">
+                <span class="status-dot"></span> Verificando conexão...
+              </span>
+            </div>
+
+            <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:20px;">
+              Conecte seu banco de dados Firebase Firestore para que as atualizações de escala e caminhões sejam
+              refletidas <strong>instantaneamente em todas as TVs, tablets e computadores</strong> sem necessidade de recarregar a página.
+            </p>
+
+            <form id="firebaseConfigForm">
+              <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:14px;">
+                <div class="form-group">
+                  <label class="form-label">API Key</label>
+                  <input type="text" id="fbApiKey" class="form-control" placeholder="AIzaSy...">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Auth Domain</label>
+                  <input type="text" id="fbAuthDomain" class="form-control" placeholder="seu-app.firebaseapp.com">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Project ID</label>
+                  <input type="text" id="fbProjectId" class="form-control" placeholder="escala-turno-xxx">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Storage Bucket</label>
+                  <input type="text" id="fbStorageBucket" class="form-control" placeholder="seu-app.appspot.com">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Messaging Sender ID</label>
+                  <input type="text" id="fbMessagingSenderId" class="form-control" placeholder="1029384756">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">App ID</label>
+                  <input type="text" id="fbAppId" class="form-control" placeholder="1:102938...:web:xxx">
+                </div>
+              </div>
+
+              <div style="display:flex; gap:12px; margin-top:20px; flex-wrap:wrap;">
+                <button type="submit" class="btn btn-cyan">
+                  💾 Salvar Configurações do Firebase
+                </button>
+                <button type="button" class="btn btn-glass" id="btnSyncToCloud">
+                  ☁️ Enviar Dados Locais para o Firestore
+                </button>
+              </div>
+            </form>
+
+            <div style="margin-top:30px; padding:18px; background:rgba(8,14,25,0.7); border-radius:var(--radius-sm); border:1px solid var(--border-subtle);">
+              <h4 style="color:var(--text-main); font-size:0.92rem; margin-bottom:8px;">💡 Como obter as credenciais do Firebase:</h4>
+              <ol style="color:var(--text-muted); font-size:0.82rem; padding-left:20px; line-height:1.7;">
+                <li>Acesse o <a href="https://console.firebase.google.com" target="_blank" style="color:var(--cyan-neon);">Console do Firebase</a> e crie um projeto gratuito.</li>
+                <li>Ative o <strong>Firestore Database</strong> no modo de teste ou configure as regras de leitura/gravação.</li>
+                <li>Em Configurações do Projeto (ícone de engrenagem) > Geral > Seus Aplicativos, adicione um aplicativo Web.</li>
+                <li>Copie as chaves do objeto <code>firebaseConfig</code> e cole nos campos acima.</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="page-footer">
+      <div class="footer-credits">
+        Painel Administrativo de Escala • <strong>Operação Sossego & Salobo</strong>
+      </div>
+      <div class="cloud-status-indicator" id="footerStatusBadge">
+        <span class="status-dot"></span> Modo Local Ativo
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ==================== MODAL DE COLABORADOR (CRIAR / EDITAR) ==================== -->
+  <div class="modal-backdrop" id="modalColaborador">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalColaboradorTitulo">👤 Novo Colaborador</h2>
+        <button class="modal-close-btn" id="btnCloseModalColab">&times;</button>
+      </div>
+
+      <form id="formColaborador">
+        <input type="hidden" id="colabId">
+
+        <div class="form-group">
+          <label class="form-label">Nome Completo *</label>
+          <input type="text" id="colabNome" class="form-control" required placeholder="Ex: Denis da Silva Duarte">
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
+          <div class="form-group">
+            <label class="form-label">Área Operacional *</label>
+            <select id="colabArea" class="form-control" required>
+              <option value="sossego">Área Sossego (3 Caminhões)</option>
+              <option value="salobo">Área Salobo (4 Caminhões)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Cargo *</label>
+            <input type="text" id="colabCargo" class="form-control" required placeholder="Ex: Motorista, Ajudante...">
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
+          <div class="form-group">
+            <label class="form-label">Regime / Situação *</label>
+            <select id="colabRegime" class="form-control" required>
+              <option value="3X3">Escala 3X3 (Revezamento)</option>
+              <option value="ADM">ADM (Segunda a Sexta)</option>
+              <option value="ESPECIAL">Especial / Supervisão</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Turno Padrão</label>
+            <select id="colabTurnoPadrao" class="form-control">
+              <option value="NOTURNO">Noturno (19h às 07h)</option>
+              <option value="DIURNO">Diurno (07h às 19h)</option>
+              <option value="ADM">Administrativo</option>
+              <option value="GERAL">Geral / Flexível</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
+          <div class="form-group">
+            <label class="form-label">Turma (se escala 3x3)</label>
+            <select id="colabTurma" class="form-control">
+              <option value="A">Turma A</option>
+              <option value="B">Turma B</option>
+              <option value="">Não se aplica</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Carteira Mina</label>
+            <select id="colabCarteiraMina" class="form-control">
+              <option value="false">Não</option>
+              <option value="true">Sim (Habilitado para Mina)</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
+          <div class="form-group">
+            <label class="form-label">Matrícula</label>
+            <input type="text" id="colabMatricula" class="form-control" placeholder="Ex: SOS-1001">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Status Atual</label>
+            <select id="colabStatus" class="form-control">
+              <option value="ativo">Ativo na Operação</option>
+              <option value="folga">Em Folga</option>
+              <option value="ferias">Em Férias</option>
+              <option value="atestado">Atestado Médico</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Observações</label>
+          <input type="text" id="colabObs" class="form-control" placeholder="Anotações operacionais...">
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-glass" id="btnCancelModalColab">Cancelar</button>
+          <button type="submit" class="btn btn-cyan">Salvar Colaborador</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL DE CAMINHÃO (CRIAR / EDITAR) ==================== -->
+  <div class="modal-backdrop" id="modalCaminhao">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalCaminhaoTitulo">🚛 Configuração de Caminhão</h2>
+        <button class="modal-close-btn" id="btnCloseModalCam">&times;</button>
+      </div>
+
+      <form id="formCaminhao">
+        <input type="hidden" id="camId">
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
+          <div class="form-group">
+            <label class="form-label">Número do Caminhão *</label>
+            <input type="text" id="camNumero" class="form-control" required placeholder="Ex: 01">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Área *</label>
+            <select id="camArea" class="form-control" required>
+              <option value="sossego">Área Sossego (3 Caminhões)</option>
+              <option value="salobo">Área Salobo (4 Caminhões)</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
+          <div class="form-group">
+            <label class="form-label">Placa</label>
+            <input type="text" id="camPlaca" class="form-control" placeholder="Ex: SOS-1A01">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Modelo</label>
+            <input type="text" id="camModelo" class="form-control" placeholder="Ex: Volvo FMX 460">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Status Operacional</label>
+          <select id="camStatus" class="form-control">
+            <option value="em_rota">Em Rota Operacional</option>
+            <option value="carregamento">Carregamento / Pátio</option>
+            <option value="disponivel">Disponível na Base</option>
+            <option value="manutencao">Manutenção Preventiva</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Destino / Frente de Lavra</label>
+          <input type="text" id="camDestino" class="form-control" placeholder="Ex: Frente de Lavra / Usina">
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-glass" id="btnCancelModalCam">Cancelar</button>
+          <button type="submit" class="btn btn-cyan">Salvar Caminhão</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Firebase SDK Compat -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+  <!-- Scripts -->
+  <script src="js/data-initial.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

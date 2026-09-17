@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Escala de Turno • Operação Sossego & Salobo</title>
+  <meta name="description" content="Sistema integrado e futurista de monitoramento e gestão de escalas de turno para as frotas e efetivo de Sossego e Salobo.">
+  
+  <!-- CSS Design System -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/print.css" media="print">
+  
+  <!-- Favicon SVG Moderno -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+</head>
+<body>
+
+  <div class="app-container">
+
+    <!-- ==================== TOPO & CONTROLE OPERACIONAL ==================== -->
+    <header class="top-navbar">
+      <div class="brand-section">
+        <div class="brand-logo-badge">⚡</div>
+        <div class="brand-info">
+          <h1>
+            ESCALA DE TURNO OPERACIONAL
+            <span class="status-dot" title="Sistema Online e Operante"></span>
+          </h1>
+          <div class="subtitle">
+            <span>Sossego (3 Caminhões)</span> • <span>Salobo (4 Caminhões)</span> • <span>Monitoramento Integrado</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Relógio Digital Operacional -->
+      <div class="live-clock-card">
+        <div class="clock-digits" id="clockDigits">00:00:00</div>
+        <div class="clock-meta">
+          <div class="clock-date" id="clockDate">Carregando data...</div>
+          <div class="clock-shift-tag" id="clockShiftTag">● TURNO OPERACIONAL</div>
+        </div>
+      </div>
+
+      <!-- Botões de Ação Rápida -->
+      <div class="top-actions">
+        <button class="btn btn-glass" id="btnTvMode" title="Alterna rotação automática entre áreas para TVs e Monitores de Sala">
+          📺 Modo TV
+        </button>
+        <button class="btn btn-glass" id="btnFullscreen" title="Visualização em Tela Cheia">
+          ⛶ Tela Cheia
+        </button>
+        <button class="btn btn-glass" id="btnPrint" title="Imprimir Escala Oficial para Mural">
+          🖨️ Imprimir / PDF
+        </button>
+        <a href="admin.html" class="btn btn-cyan" id="btnAdminLink" title="Acessar o Painel Administrativo de Efetivo e Escala">
+          ⚙️ Painel de Gestão
+        </a>
+      </div>
+    </header>
+
+    <!-- ==================== BANNER DE MÉTRICAS / STATS ==================== -->
+    <section class="stats-grid">
+      <div class="stat-card stat-cyan">
+        <div class="stat-header">
+          <span class="stat-title">Efetivo Total</span>
+          <span class="stat-icon">👥</span>
+        </div>
+        <div class="stat-value" id="statTotalEfetivo">36</div>
+        <div class="stat-subtext">Colaboradores registrados</div>
+      </div>
+
+      <div class="stat-card stat-emerald">
+        <div class="stat-header">
+          <span class="stat-title">Em Turno Hoje</span>
+          <span class="stat-icon">⚡</span>
+        </div>
+        <div class="stat-value" id="statEmTurno">--</div>
+        <div class="stat-subtext">Escalados (3x3 + ADM ativo)</div>
+      </div>
+
+      <div class="stat-card stat-amber">
+        <div class="stat-header">
+          <span class="stat-title">Caminhões em Operação</span>
+          <span class="stat-icon">🚛</span>
+        </div>
+        <div class="stat-value" id="statCaminhoesAtivos">--</div>
+        <div class="stat-subtext">Frente de mina & usina</div>
+      </div>
+
+      <div class="stat-card stat-purple">
+        <div class="stat-header">
+          <span class="stat-title">Folgas & Descanso</span>
+          <span class="stat-icon">🏖️</span>
+        </div>
+        <div class="stat-value" id="statFolgas">--</div>
+        <div class="stat-subtext">Ciclo 3x3 folga / férias</div>
+      </div>
+    </section>
+
+    <!-- ==================== BARRA DE FILTROS & SELETOR DE ÁREA ==================== -->
+    <section class="filter-control-bar">
+      <div class="area-tabs">
+        <button class="area-tab active" data-area="todas">
+          🌐 Todas as Áreas <span class="area-badge-count" id="badgeCountTodas">36</span>
+        </button>
+        <button class="area-tab" data-area="sossego">
+          🏔️ Área Sossego (3 Caminhões) <span class="area-badge-count" id="badgeCountSossego">18</span>
+        </button>
+        <button class="area-tab tab-salobo" data-area="salobo">
+          🏭 Área Salobo (4 Caminhões) <span class="area-badge-count" id="badgeCountSalobo">18</span>
+        </button>
+      </div>
+
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" class="search-input" placeholder="Buscar colaborador, cargo ou matrícula...">
+      </div>
+    </section>
+
+    <!-- ==================== FROTAS & DUPLAS OPERACIONAIS ==================== -->
+    <section>
+      <div class="section-title-wrap">
+        <h2 class="section-title">
+          🚛 Caminhões & Duplas Operacionais Ativas
+        </h2>
+        <span class="section-badge">FROTA EM OPERAÇÃO</span>
+      </div>
+
+      <div class="trucks-grid" id="trucksGrid">
+        <!-- Renderizado dinamicamente pelo app.js -->
+      </div>
+    </section>
+
+    <!-- ==================== QUADRO OPERACIONAL DE HOJE ==================== -->
+    <section>
+      <div class="section-title-wrap">
+        <h2 class="section-title">
+          📋 Efetivo Operacional do Dia
+        </h2>
+        <span class="section-badge">STATUS HOJE</span>
+      </div>
+
+      <div class="roster-today-grid">
+        <!-- Coluna 1: 3x3 em Turno -->
+        <div class="roster-card">
+          <div class="roster-card-header">
+            <h3>⚡ Escala 3x3 em Turno</h3>
+            <span style="font-size:0.75rem; color:var(--cyan-neon);">Trabalho Ativo</span>
+          </div>
+          <div class="roster-list" id="roster3x3List">
+            <!-- Renderizado dinamicamente -->
+          </div>
+        </div>
+
+        <!-- Coluna 2: Administrativo / Apoio -->
+        <div class="roster-card">
+          <div class="roster-card-header">
+            <h3>🏢 Equipe Administrativa & Apoio</h3>
+            <span style="font-size:0.75rem; color:var(--emerald-neon);">Regime ADM</span>
+          </div>
+          <div class="roster-list" id="rosterAdmList">
+            <!-- Renderizado dinamicamente -->
+          </div>
+        </div>
+
+        <!-- Coluna 3: Folgas e Afastamentos -->
+        <div class="roster-card">
+          <div class="roster-card-header">
+            <h3>🏖️ Folgas, Férias & Licenças</h3>
+            <span style="font-size:0.75rem; color:var(--purple-neon);">Descanso</span>
+          </div>
+          <div class="roster-list" id="rosterFolgasList">
+            <!-- Renderizado dinamicamente -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== GRADE MENSAL DE ESCALA ==================== -->
+    <section class="schedule-calendar-section">
+      <div class="calendar-top-controls">
+        <div class="calendar-month-selector">
+          <button class="btn btn-glass" id="prevMonthBtn">‹ Mês Anterior</button>
+          <span class="current-month-display" id="currentMonthDisplay">Setembro 2026</span>
+          <button class="btn btn-glass" id="nextMonthBtn">Próximo Mês ›</button>
+          <button class="btn btn-glass" id="currentMonthBtn">Mês Atual</button>
+        </div>
+
+        <div class="calendar-legend">
+          <div class="legend-pill">
+            <span class="legend-indicator" style="background:var(--cyan-neon);"></span>
+            <span><strong>T</strong> - Trabalho</span>
+          </div>
+          <div class="legend-pill">
+            <span class="legend-indicator" style="background:var(--text-dim);"></span>
+            <span><strong>F</strong> - Folga</span>
+          </div>
+          <div class="legend-pill">
+            <span class="legend-indicator" style="background:var(--purple-neon);"></span>
+            <span><strong>FE</strong> - Férias</span>
+          </div>
+          <div class="legend-pill">
+            <span class="legend-indicator" style="background:var(--amber-neon);"></span>
+            <span><strong>AT</strong> - Atestado</span>
+          </div>
+          <div class="legend-pill">
+            <span class="legend-indicator" style="background:var(--blue-tech);"></span>
+            <span><strong>TR</strong> - Treinamento</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-responsive-wrapper">
+        <table class="schedule-table" id="scheduleTable">
+          <thead id="scheduleTableHead">
+            <!-- Renderizado dinamicamente -->
+          </thead>
+          <tbody id="scheduleTableBody">
+            <!-- Renderizado dinamicamente -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Assinaturas oficiais para impressão/PDF -->
+    <div class="print-signatures" style="display:none;">
+      <div class="signature-box">
+        <div class="signature-line"></div>
+        <div class="signature-title">Divino Soares dos Santos</div>
+        <div style="font-size:7.5pt; color:#666;">Encarregado Operacional - Sossego</div>
+      </div>
+      <div class="signature-box">
+        <div class="signature-line"></div>
+        <div class="signature-title">Pedro Reis de Almeida</div>
+        <div style="font-size:7.5pt; color:#666;">Supervisor Administrativo - Salobo</div>
+      </div>
+    </div>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="page-footer">
+      <div class="footer-credits">
+        Sistema de Gestão Operacional de Escalas • <strong>Sossego & Salobo</strong>
+      </div>
+      <div class="cloud-status-indicator" id="cloudStatusBadge">
+        <span class="status-dot"></span> Modo Local
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Firebase SDK Compat v9 (Zero build step, pronto para Cloudflare Pages e Local) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+  <!-- Scripts da Aplicação -->
+  <script src="js/data-initial.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
