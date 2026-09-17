@@ -10,7 +10,18 @@ const FirebaseService = (function () {
   let isConnected = false;
   let listeners = [];
 
-  // Configuração padrão salva no LocalStorage ou vazia
+  // Configuração oficial do projeto Firebase fornecido pelo usuário
+  const DEFAULT_CONFIG = {
+    apiKey: "AIzaSyDxAkfhd4eb5bHPhnWjcX0Gi1_gaLQXJSg",
+    authDomain: "escala-4e21c.firebaseapp.com",
+    projectId: "escala-4e21c",
+    storageBucket: "escala-4e21c.firebasestorage.app",
+    messagingSenderId: "1032700627575",
+    appId: "1:1032700627575:web:ab747a43ab4973b5171472",
+    measurementId: "G-4C4H3M2C28"
+  };
+
+  // Configuração salva no LocalStorage ou padrão
   function getConfig() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -18,14 +29,7 @@ const FirebaseService = (function () {
     } catch (e) {
       console.warn("Erro ao ler config do Firebase:", e);
     }
-    return {
-      apiKey: "",
-      authDomain: "",
-      projectId: "",
-      storageBucket: "",
-      messagingSenderId: "",
-      appId: ""
-    };
+    return DEFAULT_CONFIG;
   }
 
   function saveConfig(config) {
