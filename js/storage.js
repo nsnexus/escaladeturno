@@ -18,6 +18,11 @@ const StorageService = (function () {
       const cached = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (cached) {
         currentData = JSON.parse(cached);
+        // Garante que o array de administradores existe mesmo se o cache for anterior
+        if (!currentData.administradores || currentData.administradores.length === 0) {
+          currentData.administradores = JSON.parse(JSON.stringify(INITIAL_DATA.administradores || []));
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(currentData));
+        }
       } else {
         currentData = JSON.parse(JSON.stringify(INITIAL_DATA));
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(currentData));
@@ -270,6 +275,81 @@ const StorageService = (function () {
     }
   }
 
+  // GESTÃO DE ADMINISTRADORES & AUTENTICAÇÃO
+  const SESSION_KEY = "escala_admin_session";
+
+  function getAdministradores() {
+    const data = getData();
+    if (!data.administradores || data.administradores.length === 0) {
+      data.administradores = JSON.parse(JSON.stringify(INITIAL_DATA.administradores || []));
+    }
+    return data.administradores;
+  }
+
+  function saveAdministrador(admin) {
+    const data = getData();
+    if (!data.administradores) data.administradores = [];
+    if (!admin.id) admin.id = "admin-" + Date.now();
+    
+    const index = data.administradores.findIndex(
+      (a) => a.id === admin.id || (a.email && a.email.toLowerCase() === (admin.email || "").toLowerCase())
+    );
+
+    if (index >= 0) {
+      data.administradores[index] = { ...data.administradores[index], ...admin };
+    } else {
+      admin.criadoEm = new Date().toISOString();
+      data.administradores.push(admin);
+    }
+    persist();
+    return admin;
+  }
+
+  function deleteAdministrador(id) {
+    const data = getData();
+    if (!data.administradores) return;
+    if (data.administradores.length <= 1) {
+      throw new Error("Não é permitido excluir o único administrador do sistema.");
+    }
+    data.administradores = data.administradores.filter((a) => a.id !== id);
+    persist();
+  }
+
+  function autenticarAdmin(email, senha) {
+    const admins = getAdministradores();
+    const cleanEmail = (email || "").trim().toLowerCase();
+    const cleanSenha = (senha || "").trim();
+
+    const user = admins.find(
+      (a) => a.email.toLowerCase() === cleanEmail && a.senha === cleanSenha
+    );
+
+    if (user) {
+      const sessionData = {
+        id: user.id,
+        nome: user.nome,
+        email: user.email,
+        nivel: user.nivel || "Administrador",
+        loginEm: new Date().toISOString()
+      };
+      localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
+      return sessionData;
+    }
+    return null;
+  }
+
+  function getUsuarioLogado() {
+    try {
+      const s = localStorage.getItem(SESSION_KEY);
+      if (s) return JSON.parse(s);
+    } catch (e) {}
+    return null;
+  }
+
+  function logout() {
+    localStorage.removeItem(SESSION_KEY);
+  }
+
   // CALCULO DE ESCALA MATEMÁTICO (3X3 e ADM)
   // Retorna { status: 'T'|'F'|'FE'|'AT'|'TR', turno: 'DIURNO'|'NOTURNO'|'ADM'|'FOLGA', detalhe: string }
   function calcularStatusDia(colaboradorId, dataIso) {
@@ -366,7 +446,13 @@ const StorageService = (function () {
     calcularStatusDia,
     resetToOriginal,
     exportBackupJSON,
-    importBackupJSON
+    importBackupJSON,
+    getAdministradores,
+    saveAdministrador,
+    deleteAdministrador,
+    autenticarAdmin,
+    getUsuarioLogado,
+    logout
   };
 })();
 

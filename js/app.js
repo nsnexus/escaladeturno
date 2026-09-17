@@ -329,6 +329,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Linhas de Colaboradores
     const colabs = StorageService.getColaboradores(state.selectedArea);
     const query = state.searchQuery.toLowerCase().trim();
+    const myColabId = localStorage.getItem("escala_meu_colaborador_id");
 
     let bodyHtml = "";
     colabs.forEach((c) => {
@@ -340,12 +341,15 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const isSalobo = c.area === "salobo";
+      const isMyColab = c.id === myColabId;
+
       bodyHtml += `
-        <tr>
+        <tr class="${isMyColab ? 'my-colab-row' : ''}">
           <td class="col-colab">
-            <div style="font-weight:600; color:var(--text-main); font-size:0.85rem;">
-              ${c.nome}
+            <div style="font-weight:600; color:var(--text-main); font-size:0.85rem; display:flex; align-items:center; flex-wrap:wrap; gap:4px;">
+              <span>${c.nome}</span>
               ${c.carteiraMina ? ` <span class="badge-mina" style="font-size:0.65rem;padding:1px 4px;">MINA</span>` : ""}
+              ${isMyColab ? `<span style="background: rgba(56,189,248,0.18); color: var(--cyan-neon); font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; border: 1px solid var(--cyan-neon);">⭐ Você</span>` : ""}
             </div>
             <div style="font-size:0.7rem; color:var(--text-dim);">
               ${c.situacao} ${c.turma3x3 ? `(Turma ${c.turma3x3})` : ''}
@@ -380,9 +384,276 @@ document.addEventListener("DOMContentLoaded", () => {
     scheduleTableBodyEl.innerHTML = bodyHtml;
   }
 
+  // ==========================================================================
+  // MINHA ESCALA: CONSULTA PESSOAL & FIXAÇÃO LOCAL NO CELULAR (MOBILE-FIRST)
+  // ==========================================================================
+  function renderPersonalSchedule() {
+    const heroEl = document.getElementById("personalScheduleHero");
+    if (!heroEl) return;
+
+    const savedId = localStorage.getItem("escala_meu_colaborador_id");
+    const allColabs = StorageService.getColaboradores("todas");
+
+    // Cenário 1: Nenhum colaborador selecionado ainda neste dispositivo
+    if (!savedId) {
+      const sossegoColabs = allColabs.filter(c => c.area === "sossego").sort((a, b) => a.nome.localeCompare(b.nome));
+      const saloboColabs = allColabs.filter(c => c.area === "salobo").sort((a, b) => a.nome.localeCompare(b.nome));
+
+      heroEl.innerHTML = `
+        <div class="personal-picker-row">
+          <div style="flex: 1; min-width: 260px;">
+            <div class="personal-hero-title">
+              <span style="font-size: 1.3rem;">📱</span>
+              <span>Minha Escala no Celular</span>
+              <span class="personal-badge-tag">Consulta Rápida</span>
+            </div>
+            <p style="font-size: 0.84rem; color: var(--text-muted); margin-top: 4px;">
+              Selecione seu nome abaixo. O sistema manterá seus dados salvos neste aparelho para você ver seu turno e caminhão direto!
+            </p>
+          </div>
+
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; width: 100%; max-width: 580px;">
+            <select id="selectMyColaborador" class="personal-select">
+              <option value="">-- Selecione seu nome na lista (36 colaboradores) --</option>
+              <optgroup label="Área Sossego (3 Caminhões)">
+                ${sossegoColabs.map(c => `<option value="${c.id}">${c.nome} • ${c.cargo} (Turma ${c.turma3x3 || 'A'})</option>`).join("")}
+              </optgroup>
+              <optgroup label="Área Salobo (4 Caminhões)">
+                ${saloboColabs.map(c => `<option value="${c.id}">${c.nome} • ${c.cargo} (Turma ${c.turma3x3 || 'A'})</option>`).join("")}
+              </optgroup>
+            </select>
+            <button id="btnSalvarMeuPerfil" class="btn btn-cyan" style="white-space: nowrap;">
+              ✓ Salvar Meu Perfil
+            </button>
+          </div>
+        </div>
+      `;
+
+      const selectEl = document.getElementById("selectMyColaborador");
+      const btnSaveEl = document.getElementById("btnSalvarMeuPerfil");
+
+      function saveProfile(id) {
+        if (!id) {
+          showToast("Selecione seu nome na lista para salvar.", "warning");
+          return;
+        }
+        localStorage.setItem("escala_meu_colaborador_id", id);
+        const savedColab = StorageService.getColaboradorById(id);
+        showToast(`Perfil fixado: ${savedColab ? savedColab.nome : 'Colaborador'}!`, "success");
+        renderPersonalSchedule();
+        renderScheduleTable();
+      }
+
+      if (btnSaveEl) {
+        btnSaveEl.addEventListener("click", () => {
+          saveProfile(selectEl ? selectEl.value : "");
+        });
+      }
+
+      if (selectEl) {
+        selectEl.addEventListener("change", (e) => {
+          if (e.target.value) {
+            saveProfile(e.target.value);
+          }
+        });
+      }
+      return;
+    }
+
+    // Cenário 2: Colaborador já salvo localmente
+    const colab = StorageService.getColaboradorById(savedId);
+    if (!colab) {
+      localStorage.removeItem("escala_meu_colaborador_id");
+      renderPersonalSchedule();
+      return;
+    }
+
+    const todayIso = getTodayIso();
+    const stHoje = StorageService.calcularStatusDia(colab.id, todayIso);
+    const isSalobo = colab.area === "salobo";
+
+    // Busca caminhão designado
+    const trucks = StorageService.getCaminhoes();
+    const meuCaminhao = trucks.find(t => t.motoristaId === colab.id || t.ajudanteId === colab.id);
+
+    let truckDesc = "Apoio / Reserva Operacional";
+    let partnerDesc = "Disponível para remanejamento";
+    let destinationDesc = "Base Operacional";
+
+    if (meuCaminhao) {
+      truckDesc = `Caminhão ${meuCaminhao.numero} (${meuCaminhao.placa || 'Sem Placa'} • ${meuCaminhao.modelo || 'Traçado'})`;
+      destinationDesc = meuCaminhao.destino || "Frente de Mina / Usina";
+
+      if (meuCaminhao.motoristaId === colab.id) {
+        const ajudante = meuCaminhao.ajudanteId ? StorageService.getColaboradorById(meuCaminhao.ajudanteId) : null;
+        partnerDesc = ajudante ? `${ajudante.nome} (${ajudante.cargo})` : "Aguardando ajudante";
+      } else {
+        const motorista = meuCaminhao.motoristaId ? StorageService.getColaboradorById(meuCaminhao.motoristaId) : null;
+        partnerDesc = motorista ? `${motorista.nome} (${motorista.cargo})` : "Aguardando motorista";
+      }
+    }
+
+    // Status Hoje Badge
+    let statusBadgeHtml = "";
+    if (stHoje.status === "T") {
+      statusBadgeHtml = `
+        <div class="my-status-badge trabalho">
+          <span>🟢</span> TRABALHANDO HOJE
+        </div>
+      `;
+    } else if (stHoje.status === "F") {
+      statusBadgeHtml = `
+        <div class="my-status-badge folga">
+          <span>⚪</span> FOLGA HOJE
+        </div>
+      `;
+    } else if (stHoje.status === "FE") {
+      statusBadgeHtml = `
+        <div class="my-status-badge" style="background: rgba(168,85,247,0.15); color: var(--purple-neon); border: 1px solid var(--purple-neon);">
+          <span>🟣</span> EM FÉRIAS
+        </div>
+      `;
+    } else if (stHoje.status === "AT") {
+      statusBadgeHtml = `
+        <div class="my-status-badge" style="background: rgba(245,158,11,0.15); color: var(--amber-neon); border: 1px solid var(--amber-neon);">
+          <span>🟡</span> ATESTADO MÉDICO
+        </div>
+      `;
+    } else {
+      statusBadgeHtml = `
+        <div class="my-status-badge" style="background: rgba(59,130,246,0.15); color: #93c5fd; border: 1px solid #3b82f6;">
+          <span>🔵</span> ${stHoje.detalhe || 'TREINAMENTO'}
+        </div>
+      `;
+    }
+
+    // Previsão dos Próximos 7 Dias
+    const weekDaysNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+    let timelineCardsHtml = "";
+
+    for (let i = 0; i < 7; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() + i);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      const dIso = `${year}-${month}-${day}`;
+
+      const stDia = StorageService.calcularStatusDia(colab.id, dIso);
+      const isToday = i === 0;
+      const dayName = isToday ? "Hoje" : weekDaysNames[d.getDay()];
+      const dayDateStr = `${day}/${month}`;
+
+      let tagClass = "tag-f";
+      let tagText = "Folga";
+      if (stDia.status === "T") {
+        tagClass = "tag-t";
+        tagText = "Trabalho";
+      } else if (stDia.status === "FE") {
+        tagText = "Férias";
+      } else if (stDia.status === "AT") {
+        tagText = "Atestado";
+      } else if (stDia.status === "TR") {
+        tagText = "Treino";
+      }
+
+      timelineCardsHtml += `
+        <div class="timeline-day-card ${isToday ? 'is-today' : ''}">
+          <div class="timeline-day-name">${dayName}</div>
+          <div class="timeline-day-date">${dayDateStr}</div>
+          <div class="timeline-day-tag ${tagClass}">${tagText}</div>
+        </div>
+      `;
+    }
+
+    const todayDateFormatted = new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" });
+
+    heroEl.innerHTML = `
+      <div class="personal-hero-header">
+        <div class="personal-hero-title">
+          <span style="font-size: 1.4rem;">👤</span>
+          <div>
+            <span style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Meu Perfil Salvo:</span>
+            <div style="font-size: 1.25rem; font-weight: 800; color: var(--text-main);">${colab.nome}</div>
+          </div>
+          <span class="personal-badge-tag">${colab.cargo}</span>
+          <span class="personal-badge-tag" style="background: ${isSalobo ? 'rgba(34, 197, 94, 0.12)' : 'rgba(56, 189, 248, 0.12)'}; color: ${isSalobo ? 'var(--emerald-neon)' : 'var(--cyan-neon)'};">
+            Área ${isSalobo ? 'Salobo' : 'Sossego'}
+          </span>
+          <span class="personal-badge-tag" style="background: rgba(245, 158, 11, 0.12); color: var(--amber-neon);">
+            Turma ${colab.turma3x3 || 'A'}
+          </span>
+        </div>
+
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button class="btn btn-glass" id="btnTrocarColaborador" style="padding: 7px 14px; font-size: 0.82rem;" title="Mudar o colaborador fixado neste aparelho">
+            🔄 Trocar Nome
+          </button>
+        </div>
+      </div>
+
+      <div class="my-card-content">
+        <div class="my-status-box">
+          ${statusBadgeHtml}
+          <div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: capitalize;">${todayDateFormatted}</div>
+            <div style="font-size: 0.95rem; font-weight: 600; color: var(--text-main); margin-top: 2px;">
+              ${stHoje.detalhe}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="my-details-grid">
+        <div class="my-detail-item">
+          <div class="label">Caminhão Designado</div>
+          <div class="val">${truckDesc}</div>
+        </div>
+        <div class="my-detail-item">
+          <div class="label">Sua Dupla / Parceiro</div>
+          <div class="val">${partnerDesc}</div>
+        </div>
+        <div class="my-detail-item">
+          <div class="label">Destino / Frente</div>
+          <div class="val">${destinationDesc}</div>
+        </div>
+        <div class="my-detail-item">
+          <div class="label">Regime & Horário</div>
+          <div class="val">${colab.regime || 'Escala 3x3'} • ${stHoje.turno}</div>
+        </div>
+      </div>
+
+      <div style="margin-top: 16px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+          <span style="font-size: 0.78rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">
+            Previsão dos Próximos 7 Dias
+          </span>
+          <a href="#scheduleCalendarSection" style="font-size: 0.75rem; color: var(--cyan-neon); text-decoration: none; font-weight: 600;">
+            Ver Mês Completo ↓
+          </a>
+        </div>
+        <div class="my-week-timeline">
+          ${timelineCardsHtml}
+        </div>
+      </div>
+    `;
+
+    // Event listener para trocar colaborador
+    const btnTrocar = document.getElementById("btnTrocarColaborador");
+    if (btnTrocar) {
+      btnTrocar.addEventListener("click", () => {
+        localStorage.removeItem("escala_meu_colaborador_id");
+        showToast("Seleção de colaborador desfeita. Escolha outro nome.", "info");
+        renderPersonalSchedule();
+        renderScheduleTable();
+      });
+    }
+  }
+
   // 7. RENDERIZAÇÃO COMPLETA DA APLICAÇÃO
   function renderAll() {
     const data = StorageService.getData();
+    renderPersonalSchedule();
     renderStats(data);
     renderTrucks();
     renderTodayRoster();
@@ -481,11 +752,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Alternar Tema Claro / Escuro (White / Dark)
+  // Alternar Tema Claro / Escuro (Apenas Ícone no Canto Superior Direito)
   const btnThemeToggle = document.getElementById("btnThemeToggle");
   function updateThemeButton(theme) {
     if (btnThemeToggle) {
-      btnThemeToggle.innerHTML = theme === "light" ? "🌙 Modo Escuro" : "☀️ Modo Claro";
+      btnThemeToggle.innerHTML = theme === "light" ? "🌙" : "☀️";
+      btnThemeToggle.title = theme === "light" ? "Mudar para Modo Escuro" : "Mudar para Modo Claro";
     }
   }
 
@@ -502,10 +774,47 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Impressão / PDF
-  if (btnPrint) {
-    btnPrint.addEventListener("click", () => {
-      window.print();
+  // CONTROLE DE ACESSO AO PAINEL DE GESTÃO (LOGIN / SENHA)
+  const btnAdminLink = document.getElementById("btnAdminLink");
+  const modalLogin = document.getElementById("modalLogin");
+  const formLogin = document.getElementById("formLogin");
+  const btnCancelLogin = document.getElementById("btnCancelLogin");
+  const loginErrorMsg = document.getElementById("loginErrorMsg");
+
+  if (btnAdminLink) {
+    btnAdminLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      const user = StorageService.getUsuarioLogado();
+      if (user) {
+        window.location.href = "admin.html";
+      } else {
+        if (loginErrorMsg) loginErrorMsg.style.display = "none";
+        if (modalLogin) modalLogin.classList.add("open");
+      }
+    });
+  }
+
+  if (btnCancelLogin && modalLogin) {
+    btnCancelLogin.addEventListener("click", () => {
+      modalLogin.classList.remove("open");
+    });
+  }
+
+  if (formLogin) {
+    formLogin.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const email = document.getElementById("loginEmail").value.trim();
+      const senha = document.getElementById("loginSenha").value.trim();
+
+      const user = StorageService.autenticarAdmin(email, senha);
+      if (user) {
+        showToast(`Bem-vindo, ${user.nome}! Redirecionando...`, "success");
+        setTimeout(() => {
+          window.location.href = "admin.html";
+        }, 600);
+      } else {
+        if (loginErrorMsg) loginErrorMsg.style.display = "block";
+      }
     });
   }
 

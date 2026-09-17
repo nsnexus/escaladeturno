@@ -624,11 +624,136 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 7. RENDERIZAÇÃO GERAL DO ADMIN
+  // 7. GESTÃO DE ADMINISTRADORES
+  const adminUsersTableBody = document.getElementById("adminUsersTableBody");
+  const navBadgeAdmins = document.getElementById("navBadgeAdmins");
+  const btnNovoAdmin = document.getElementById("btnNovoAdmin");
+  const modalAdmin = document.getElementById("modalAdmin");
+  const formAdmin = document.getElementById("formAdmin");
+  const btnCloseModalAdmin = document.getElementById("btnCloseModalAdmin");
+  const btnCancelModalAdmin = document.getElementById("btnCancelModalAdmin");
+  const modalAdminTitulo = document.getElementById("modalAdminTitulo");
+
+  function renderAdminsTable() {
+    if (!adminUsersTableBody) return;
+    const admins = StorageService.getAdministradores();
+    if (navBadgeAdmins) navBadgeAdmins.textContent = admins.length;
+
+    adminUsersTableBody.innerHTML = admins
+      .map((a) => {
+        const isSuper = a.nivel === "Super Admin";
+        const dateStr = a.criadoEm ? new Date(a.criadoEm).toLocaleDateString("pt-BR") : "Original";
+
+        return `
+          <tr>
+            <td>
+              <div style="font-weight:600; color:var(--text-main);">${a.nome}</div>
+            </td>
+            <td>
+              <div style="font-family:var(--font-mono); color:var(--cyan-neon);">${a.email}</div>
+            </td>
+            <td>
+              <span class="roster-status-tag ${isSuper ? 'tag-trabalho' : 'tag-folga'}">
+                ${a.nivel || 'Administrador'}
+              </span>
+            </td>
+            <td style="color:var(--text-dim); font-size:0.8rem;">
+              ${dateStr}
+            </td>
+            <td>
+              <div class="table-actions-cell" style="justify-content:center;">
+                <button class="btn-icon btn-icon-edit" onclick="window.editarAdmin('${a.id}')" title="Editar / Alterar Senha">
+                  ✏️
+                </button>
+                ${
+                  admins.length > 1
+                    ? `<button class="btn-icon btn-icon-danger" onclick="window.excluirAdmin('${a.id}')" title="Excluir Administrador">🗑️</button>`
+                    : ""
+                }
+              </div>
+            </td>
+          </tr>
+        `;
+      })
+      .join("");
+  }
+
+  window.abrirModalNovoAdmin = function () {
+    if (formAdmin) formAdmin.reset();
+    document.getElementById("adminUserId").value = "";
+    if (modalAdminTitulo) modalAdminTitulo.textContent = "🔑 Novo Administrador";
+    if (modalAdmin) modalAdmin.classList.add("open");
+  };
+
+  if (btnNovoAdmin) btnNovoAdmin.addEventListener("click", window.abrirModalNovoAdmin);
+
+  window.editarAdmin = function (id) {
+    const admins = StorageService.getAdministradores();
+    const a = admins.find((u) => u.id === id);
+    if (!a) return;
+
+    document.getElementById("adminUserId").value = a.id;
+    document.getElementById("adminNome").value = a.nome;
+    document.getElementById("adminEmail").value = a.email;
+    document.getElementById("adminSenha").value = a.senha || "";
+    document.getElementById("adminNivel").value = a.nivel || "Administrador";
+
+    if (modalAdminTitulo) modalAdminTitulo.textContent = "✏️ Editar Administrador";
+    if (modalAdmin) modalAdmin.classList.add("open");
+  };
+
+  window.excluirAdmin = function (id) {
+    const admins = StorageService.getAdministradores();
+    const a = admins.find((u) => u.id === id);
+    if (!a) return;
+
+    if (confirm(`Tem certeza que deseja remover o acesso do administrador "${a.nome}" (${a.email})?`)) {
+      try {
+        StorageService.deleteAdministrador(id);
+        showToast(`Administrador ${a.nome} removido!`, "warning");
+        renderAdminsTable();
+      } catch (err) {
+        showToast(err.message, "error");
+      }
+    }
+  };
+
+  function fecharModalAdmin() {
+    if (modalAdmin) modalAdmin.classList.remove("open");
+  }
+
+  if (btnCloseModalAdmin) btnCloseModalAdmin.addEventListener("click", fecharModalAdmin);
+  if (btnCancelModalAdmin) btnCancelModalAdmin.addEventListener("click", fecharModalAdmin);
+
+  if (formAdmin) {
+    formAdmin.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const id = document.getElementById("adminUserId").value;
+      const nome = document.getElementById("adminNome").value.trim();
+      const email = document.getElementById("adminEmail").value.trim().toLowerCase();
+      const senha = document.getElementById("adminSenha").value.trim();
+      const nivel = document.getElementById("adminNivel").value;
+
+      StorageService.saveAdministrador({
+        id: id || undefined,
+        nome,
+        email,
+        senha,
+        nivel
+      });
+
+      fecharModalAdmin();
+      showToast(`Administrador ${nome} salvo com sucesso!`, "success");
+      renderAdminsTable();
+    });
+  }
+
+  // 8. RENDERIZAÇÃO GERAL DO ADMIN
   function renderAllAdmin() {
     renderColaboradoresTable();
     renderTrucksAdmin();
     populateEscalaSelects();
+    renderAdminsTable();
   }
 
   // Toast Helper
@@ -656,13 +781,15 @@ document.addEventListener("DOMContentLoaded", () => {
   StorageService.subscribe(() => {
     renderColaboradoresTable();
     renderTrucksAdmin();
+    renderAdminsTable();
   });
 
-  // Alternar Tema Claro / Escuro (White / Dark)
+  // Alternar Tema Claro / Escuro (Apenas Ícone no Canto Superior Direito)
   const btnThemeToggleAdmin = document.getElementById("btnThemeToggleAdmin");
   function updateThemeButtonAdmin(theme) {
     if (btnThemeToggleAdmin) {
-      btnThemeToggleAdmin.innerHTML = theme === "light" ? "🌙 Modo Escuro" : "☀️ Modo Claro";
+      btnThemeToggleAdmin.innerHTML = theme === "light" ? "🌙" : "☀️";
+      btnThemeToggleAdmin.title = theme === "light" ? "Mudar para Modo Escuro" : "Mudar para Modo Claro";
     }
   }
 
@@ -679,7 +806,50 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // CONTROLE DE AUTENTICAÇÃO E BLOQUEIO (AUTH WALL)
+  const modalAdminAuthWall = document.getElementById("modalAdminAuthWall");
+  const formAdminAuthWall = document.getElementById("formAdminAuthWall");
+  const authWallErrorMsg = document.getElementById("authWallErrorMsg");
+  const adminUserEmailDisplay = document.getElementById("adminUserEmailDisplay");
+  const btnLogout = document.getElementById("btnLogout");
+
+  function verificarAutenticacao() {
+    const user = StorageService.getUsuarioLogado();
+    if (!user) {
+      if (modalAdminAuthWall) modalAdminAuthWall.style.display = "flex";
+    } else {
+      if (modalAdminAuthWall) modalAdminAuthWall.style.display = "none";
+      if (adminUserEmailDisplay) adminUserEmailDisplay.textContent = user.email;
+    }
+  }
+
+  if (formAdminAuthWall) {
+    formAdminAuthWall.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const email = document.getElementById("authWallEmail").value.trim();
+      const senha = document.getElementById("authWallSenha").value.trim();
+
+      const user = StorageService.autenticarAdmin(email, senha);
+      if (user) {
+        modalAdminAuthWall.style.display = "none";
+        if (adminUserEmailDisplay) adminUserEmailDisplay.textContent = user.email;
+        showToast(`Autenticado com sucesso como ${user.nome}!`, "success");
+        renderAllAdmin();
+      } else {
+        if (authWallErrorMsg) authWallErrorMsg.style.display = "block";
+      }
+    });
+  }
+
+  if (btnLogout) {
+    btnLogout.addEventListener("click", () => {
+      StorageService.logout();
+      window.location.href = "index.html";
+    });
+  }
+
   // Inicializa Firebase se configurado e renderiza
   FirebaseService.initFirebase();
+  verificarAutenticacao();
   renderAllAdmin();
 });

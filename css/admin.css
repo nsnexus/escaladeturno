@@ -62,10 +62,9 @@
 }
 
 .admin-nav-item.active {
-  background: rgba(0, 240, 255, 0.1);
-  border-color: rgba(0, 240, 255, 0.3);
+  background: rgba(2, 132, 199, 0.12);
+  border-color: var(--cyan-neon);
   color: var(--cyan-neon);
-  box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
 }
 
 .admin-nav-item .nav-icon {
@@ -200,7 +199,7 @@
 }
 
 .btn-icon-edit:hover {
-  background: rgba(0, 240, 255, 0.2);
+  background: rgba(2, 132, 199, 0.2);
   border-color: var(--cyan-neon);
   color: var(--cyan-neon);
 }
@@ -274,7 +273,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+  box-shadow: var(--shadow-sm);
   transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   margin: 0 auto;
 }
@@ -312,7 +311,7 @@
 
 .pin-digit-input:focus {
   border-color: var(--cyan-neon);
-  box-shadow: 0 0 12px rgba(0, 240, 255, 0.3);
+  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2);
 }
 
 /* Regras de Tema Claro para o Painel Admin */
@@ -332,7 +331,6 @@
   background: rgba(2, 132, 199, 0.1);
   border-color: rgba(2, 132, 199, 0.4);
   color: var(--cyan-neon);
-  box-shadow: 0 0 10px rgba(2, 132, 199, 0.15);
 }
 
 [data-theme="light"] .admin-table th {

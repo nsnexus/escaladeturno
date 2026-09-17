@@ -714,7 +714,19 @@ const INITIAL_DATA = {
     // Ajustes pontuais ou exceções na escala (Data -> ColaboradorId -> Status)
     // Exemplos de status: "T" (Trabalho), "F" (Folga), "FE" (Férias), "AT" (Atestado), "TR" (Treinamento)
     excecoes: {}
-  }
+  },
+
+  // Administradores do Sistema com acesso ao Painel de Gestão
+  administradores: [
+    {
+      id: "admin-narciso",
+      nome: "Narciso Felizardo",
+      email: "narcisofelizardo@gmail.com",
+      senha: "admin", // Senha inicial de acesso
+      nivel: "Super Admin",
+      criadoEm: "2026-09-17T19:00:00.000Z"
+    }
+  ]
 };
 
 // Exporta para uso em navegadores e Node.js

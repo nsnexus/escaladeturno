@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Escala de Turno • Operação Sossego & Salobo</title>
-  <meta name="description" content="Sistema integrado e futurista de monitoramento e gestão de escalas de turno para as frotas e efetivo de Sossego e Salobo.">
+  <title>Escala de Turno Operacional • Sossego & Salobo</title>
+  <meta name="description" content="Sistema corporativo de gestão e monitoramento de escalas de turno para as frotas e efetivo de Sossego e Salobo.">
   
   <!-- CSS Design System -->
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/print.css" media="print">
   
-  <!-- Favicon SVG Moderno -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <!-- Favicon Corporativo -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
   <!-- Script anti-flicker de tema -->
   <script>
     (function() {
@@ -27,11 +27,11 @@
     <!-- ==================== TOPO & CONTROLE OPERACIONAL ==================== -->
     <header class="top-navbar">
       <div class="brand-section">
-        <div class="brand-logo-badge">⚡</div>
+        <div class="brand-logo-badge">📋</div>
         <div class="brand-info">
           <h1>
             ESCALA DE TURNO OPERACIONAL
-            <span class="status-dot" title="Sistema Online e Operante"></span>
+            <span class="status-dot" title="Sistema Operante"></span>
           </h1>
           <div class="subtitle">
             <span>Sossego (3 Caminhões)</span> • <span>Salobo (4 Caminhões)</span> • <span>Monitoramento Integrado</span>
@@ -50,23 +50,22 @@
 
       <!-- Botões de Ação Rápida -->
       <div class="top-actions">
-        <button class="btn btn-glass" id="btnThemeToggle" title="Alternar entre Tema Claro e Escuro">
-          ☀️ Modo Claro
-        </button>
-        <button class="btn btn-glass" id="btnTvMode" title="Alterna rotação automática entre áreas para TVs e Monitores de Sala">
-          📺 Modo TV
-        </button>
         <button class="btn btn-glass" id="btnFullscreen" title="Visualização em Tela Cheia">
           ⛶ Tela Cheia
         </button>
-        <button class="btn btn-glass" id="btnPrint" title="Imprimir Escala Oficial para Mural">
-          🖨️ Imprimir / PDF
-        </button>
-        <a href="admin.html" class="btn btn-cyan" id="btnAdminLink" title="Acessar o Painel Administrativo de Efetivo e Escala">
+        <button class="btn btn-cyan" id="btnAdminLink" title="Acessar o Painel Administrativo de Efetivo e Escala">
           ⚙️ Painel de Gestão
-        </a>
+        </button>
+        <button class="btn-icon-theme" id="btnThemeToggle" title="Alternar entre Tema Claro e Escuro">
+          ☀️
+        </button>
       </div>
     </header>
+
+    <!-- ==================== MINHA ESCALA (CONSULTA PESSOAL SALVA NO CELULAR) ==================== -->
+    <section class="personal-schedule-hero" id="personalScheduleHero">
+      <!-- Renderizado dinamicamente pelo app.js -->
+    </section>
 
     <!-- ==================== BANNER DE MÉTRICAS / STATS ==================== -->
     <section class="stats-grid">
@@ -252,6 +251,44 @@
         Sistema de Gestão Operacional de Escalas • <strong>Sossego & Salobo</strong>
       </div>
     </footer>
+
+    <!-- ==================== MODAL DE LOGIN (ACESSO RESTRITO) ==================== -->
+    <div class="modal-backdrop" id="modalLogin">
+      <div class="modal-content" style="max-width: 420px; text-align: center;">
+        <div style="margin-bottom: 20px;">
+          <div style="width: 54px; height: 54px; border-radius: var(--radius-sm); background: #0284c7; color: #ffffff; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; box-shadow: var(--shadow-sm);">
+            🔐
+          </div>
+          <h2 style="font-family: var(--font-heading); font-size: 1.3rem; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">
+            Acesso Restrito
+          </h2>
+          <p style="font-size: 0.82rem; color: var(--text-muted);">
+            Informe suas credenciais de Administrador
+          </p>
+        </div>
+
+        <form id="formLogin" style="text-align: left;">
+          <div class="form-group">
+            <label class="form-label">E-mail</label>
+            <input type="email" id="loginEmail" class="form-control" required placeholder="narcisofelizardo@gmail.com" value="narcisofelizardo@gmail.com">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Senha</label>
+            <input type="password" id="loginSenha" class="form-control" required placeholder="Digite sua senha">
+          </div>
+
+          <div id="loginErrorMsg" style="display: none; color: var(--coral-neon); font-size: 0.82rem; margin-bottom: 12px; text-align: center; font-weight: 600;">
+            E-mail ou senha incorretos.
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button type="button" class="btn btn-glass" id="btnCancelLogin" style="flex: 1;">Cancelar</button>
+            <button type="submit" class="btn btn-cyan" style="flex: 1;">Entrar</button>
+          </div>
+        </form>
+      </div>
+    </div>
 
   </div>
 

@@ -37,9 +37,9 @@
       </div>
 
       <div class="top-actions">
-        <button class="btn btn-glass" id="btnThemeToggleAdmin" title="Alternar entre Tema Claro e Escuro">
-          ☀️ Modo Claro
-        </button>
+        <span id="adminUserGreeting" style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; gap: 6px;">
+          👤 <span id="adminUserEmailDisplay">narcisofelizardo@gmail.com</span>
+        </span>
         <a href="index.html" class="btn btn-glass" title="Voltar para a tela de monitoramento público / TV">
           📺 Ver Painel TV
         </a>
@@ -52,6 +52,12 @@
         <input type="file" id="backupFileInput" accept=".json" style="display:none;">
         <button class="btn btn-cyan" id="btnResetOriginal" title="Restaura os 36 colaboradores e frotas das planilhas oficiais Sossego e Salobo">
           ↺ Restaurar Dados Originais
+        </button>
+        <button class="btn btn-glass" id="btnLogout" title="Encerrar sessão de administrador" style="color: var(--coral-neon);">
+          🚪 Sair
+        </button>
+        <button class="btn-icon-theme" id="btnThemeToggleAdmin" title="Alternar entre Tema Claro e Escuro">
+          ☀️
         </button>
       </div>
     </header>
@@ -79,6 +85,12 @@
           <span class="nav-icon">📅</span>
           <span>Ajuste de Escalas</span>
           <span class="nav-badge">3x3 / ADM</span>
+        </button>
+
+        <button class="admin-nav-item" data-tab="tab-admins">
+          <span class="nav-icon">🔑</span>
+          <span>Administradores</span>
+          <span class="nav-badge" id="navBadgeAdmins">1</span>
         </button>
       </aside>
 
@@ -252,6 +264,37 @@
           </div>
         </div>
 
+        <!-- ==================== ABA 4: GESTÃO DE ADMINISTRADORES ==================== -->
+        <div class="admin-tab-pane" id="tab-admins">
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <h2>🔑 Administradores do Sistema</h2>
+              <button class="btn btn-cyan" id="btnNovoAdmin">+ Novo Administrador</button>
+            </div>
+
+            <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:20px;">
+              Usuários cadastrados com permissão de login e gerenciamento de escalas e efetivo.
+            </p>
+
+            <div class="table-responsive-wrapper">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Nome</th>
+                    <th>E-mail</th>
+                    <th>Nível</th>
+                    <th>Cadastrado em</th>
+                    <th style="text-align:center;">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="adminUsersTableBody">
+                  <!-- Renderizado dinamicamente pelo admin.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
       </main>
     </div>
 
@@ -421,6 +464,82 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-glass" id="btnCancelModalCam">Cancelar</button>
           <button type="submit" class="btn btn-cyan">Salvar Caminhão</button>
+        </div>
+  <!-- ==================== MODAL DE ADMINISTRADOR (CRIAR / EDITAR) ==================== -->
+  <div class="modal-backdrop" id="modalAdmin">
+    <div class="modal-content" style="max-width: 480px;">
+      <div class="modal-header">
+        <h2 id="modalAdminTitulo">🔑 Novo Administrador</h2>
+        <button class="modal-close-btn" id="btnCloseModalAdmin">&times;</button>
+      </div>
+
+      <form id="formAdmin">
+        <input type="hidden" id="adminUserId">
+
+        <div class="form-group">
+          <label class="form-label">Nome Completo *</label>
+          <input type="text" id="adminNome" class="form-control" required placeholder="Ex: Narciso Felizardo">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">E-mail de Login *</label>
+          <input type="email" id="adminEmail" class="form-control" required placeholder="admin@email.com">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Senha de Acesso *</label>
+          <input type="password" id="adminSenha" class="form-control" required placeholder="Defina a senha de acesso">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Nível de Permissão</label>
+          <select id="adminNivel" class="form-control">
+            <option value="Administrador">Administrador</option>
+            <option value="Super Admin">Super Admin</option>
+          </select>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-glass" id="btnCancelModalAdmin">Cancelar</button>
+          <button type="submit" class="btn btn-cyan">Salvar Administrador</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== BLOQUEIO DE LOGIN / AUTH WALL (ADMIN) ==================== -->
+  <div class="modal-backdrop" id="modalAdminAuthWall" style="display: none; z-index: 9999;">
+    <div class="modal-content" style="max-width: 420px; text-align: center;">
+      <div style="margin-bottom: 20px;">
+        <div style="width: 58px; height: 58px; border-radius: 50%; background: var(--grad-amber); color: #080c14; font-size: 1.7rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; box-shadow: 0 0 20px rgba(255, 184, 0, 0.3);">
+          🔐
+        </div>
+        <h2 style="font-family: var(--font-heading); font-size: 1.3rem; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">
+          Painel Protegido
+        </h2>
+        <p style="font-size: 0.82rem; color: var(--text-muted);">
+          Informe suas credenciais para continuar
+        </p>
+      </div>
+
+      <form id="formAdminAuthWall" style="text-align: left;">
+        <div class="form-group">
+          <label class="form-label">E-mail</label>
+          <input type="email" id="authWallEmail" class="form-control" required placeholder="narcisofelizardo@gmail.com" value="narcisofelizardo@gmail.com">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Senha</label>
+          <input type="password" id="authWallSenha" class="form-control" required placeholder="Digite sua senha">
+        </div>
+
+        <div id="authWallErrorMsg" style="display: none; color: var(--coral-neon); font-size: 0.82rem; margin-bottom: 12px; text-align: center; font-weight: 600;">
+          E-mail ou senha incorretos.
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <a href="index.html" class="btn btn-glass" style="flex: 1; text-align: center;">Voltar ao Início</a>
+          <button type="submit" class="btn btn-cyan" style="flex: 1;">Entrar</button>
         </div>
       </form>
     </div>
