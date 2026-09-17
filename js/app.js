@@ -488,14 +488,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 9. STATUS FIREBASE
-  FirebaseService.onStatusChange((connected, msg) => {
-    if (cloudStatusBadge) {
-      cloudStatusBadge.innerHTML = connected
-        ? `<span class="status-dot" style="width:7px;height:7px;background:var(--emerald-neon)"></span> Firebase: Online`
-        : `<span class="status-dot" style="width:7px;height:7px;background:var(--amber-neon)"></span> Modo Local`;
-    }
-  });
+  // 9. REATIVIDADE COM STORAGE (SINCRONIZAÇÃO EM TEMPO REAL)
 
   // 10. REATIVIDADE COM STORAGE (SINCRONIZAÇÃO EM TEMPO REAL)
   StorageService.subscribe(() => {

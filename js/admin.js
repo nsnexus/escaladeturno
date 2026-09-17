@@ -621,19 +621,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  FirebaseService.onStatusChange((connected, msg) => {
-    if (firebaseStatusIndicator) {
-      firebaseStatusIndicator.innerHTML = connected
-        ? `<span class="status-dot" style="background:var(--emerald-neon)"></span> ${msg}`
-        : `<span class="status-dot" style="background:var(--amber-neon)"></span> ${msg}`;
-    }
-    if (footerStatusBadge) {
-      footerStatusBadge.innerHTML = connected
-        ? `<span class="status-dot" style="background:var(--emerald-neon)"></span> Nuvem Conectada`
-        : `<span class="status-dot" style="background:var(--amber-neon)"></span> Modo Local`;
-    }
-  });
-
   // 7. BACKUP & RESTAURAÇÃO
   if (btnExportBackup) {
     btnExportBackup.addEventListener("click", () => {
