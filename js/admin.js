@@ -578,50 +578,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 6. FIREBASE & NUVEM
-  function loadFirebaseConfigForm() {
-    const cfg = FirebaseService.getConfig();
-    if (fbApiKey) fbApiKey.value = cfg.apiKey || "";
-    if (fbAuthDomain) fbAuthDomain.value = cfg.authDomain || "";
-    if (fbProjectId) fbProjectId.value = cfg.projectId || "";
-    if (fbStorageBucket) fbStorageBucket.value = cfg.storageBucket || "";
-    if (fbMessagingSenderId) fbMessagingSenderId.value = cfg.messagingSenderId || "";
-    if (fbAppId) fbAppId.value = cfg.appId || "";
-  }
-
-  if (firebaseConfigForm) {
-    firebaseConfigForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const newCfg = {
-        apiKey: fbApiKey.value.trim(),
-        authDomain: fbAuthDomain.value.trim(),
-        projectId: fbProjectId.value.trim(),
-        storageBucket: fbStorageBucket.value.trim(),
-        messagingSenderId: fbMessagingSenderId.value.trim(),
-        appId: fbAppId.value.trim()
-      };
-
-      FirebaseService.saveConfig(newCfg);
-      showToast("Configuração salva! Tentando conectar ao Firebase...", "info");
-
-      const success = await FirebaseService.initFirebase();
-      if (success) {
-        StorageService.setupFirebaseListener();
-        showToast("Conexão com Firebase Firestore estabelecida com sucesso!", "success");
-      } else {
-        showToast("Operando em modo local. Verifique as credenciais se desejar nuvem.", "warning");
-      }
-    });
-  }
-
-  if (btnSyncToCloud) {
-    btnSyncToCloud.addEventListener("click", () => {
-      StorageService.persist();
-      showToast("Dados enviados para o Firebase Firestore!", "success");
-    });
-  }
-
-  // 7. BACKUP & RESTAURAÇÃO
+  // 6. BACKUP & RESTAURAÇÃO
   if (btnExportBackup) {
     btnExportBackup.addEventListener("click", () => {
       StorageService.exportBackupJSON();
@@ -667,12 +624,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 8. RENDERIZAÇÃO GERAL DO ADMIN
+  // 7. RENDERIZAÇÃO GERAL DO ADMIN
   function renderAllAdmin() {
     renderColaboradoresTable();
     renderTrucksAdmin();
     populateEscalaSelects();
-    loadFirebaseConfigForm();
   }
 
   // Toast Helper

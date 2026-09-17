@@ -80,12 +80,6 @@
           <span>Ajuste de Escalas</span>
           <span class="nav-badge">3x3 / ADM</span>
         </button>
-
-        <button class="admin-nav-item" data-tab="tab-firebase">
-          <span class="nav-icon">☁️</span>
-          <span>Nuvem & Firebase</span>
-          <span class="nav-badge" id="navBadgeFirebase">Config</span>
-        </button>
       </aside>
 
       <!-- Conteúdo Principal do Admin -->
@@ -255,73 +249,6 @@
               </div>
             </div>
 
-          </div>
-        </div>
-
-        <!-- ==================== ABA 4: FIREBASE & NUVEM ==================== -->
-        <div class="admin-tab-pane" id="tab-firebase">
-          <div class="admin-card">
-            <div class="admin-card-header">
-              <h2>☁️ Conexão Firebase Firestore</h2>
-            </div>
-
-            <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:20px;">
-              Conecte seu banco de dados Firebase Firestore para que as atualizações de escala e caminhões sejam
-              refletidas <strong>instantaneamente em todas as TVs, tablets e computadores</strong> sem necessidade de recarregar a página.
-            </p>
-
-            <form id="firebaseConfigForm">
-              <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:14px;">
-                <div class="form-group">
-                  <label class="form-label">API Key</label>
-                  <input type="text" id="fbApiKey" class="form-control" placeholder="AIzaSy...">
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label">Auth Domain</label>
-                  <input type="text" id="fbAuthDomain" class="form-control" placeholder="seu-app.firebaseapp.com">
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label">Project ID</label>
-                  <input type="text" id="fbProjectId" class="form-control" placeholder="escala-turno-xxx">
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label">Storage Bucket</label>
-                  <input type="text" id="fbStorageBucket" class="form-control" placeholder="seu-app.appspot.com">
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label">Messaging Sender ID</label>
-                  <input type="text" id="fbMessagingSenderId" class="form-control" placeholder="1029384756">
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label">App ID</label>
-                  <input type="text" id="fbAppId" class="form-control" placeholder="1:102938...:web:xxx">
-                </div>
-              </div>
-
-              <div style="display:flex; gap:12px; margin-top:20px; flex-wrap:wrap;">
-                <button type="submit" class="btn btn-cyan">
-                  💾 Salvar Configurações do Firebase
-                </button>
-                <button type="button" class="btn btn-glass" id="btnSyncToCloud">
-                  ☁️ Enviar Dados Locais para o Firestore
-                </button>
-              </div>
-            </form>
-
-            <div style="margin-top:30px; padding:18px; background:rgba(8,14,25,0.7); border-radius:var(--radius-sm); border:1px solid var(--border-subtle);">
-              <h4 style="color:var(--text-main); font-size:0.92rem; margin-bottom:8px;">💡 Como obter as credenciais do Firebase:</h4>
-              <ol style="color:var(--text-muted); font-size:0.82rem; padding-left:20px; line-height:1.7;">
-                <li>Acesse o <a href="https://console.firebase.google.com" target="_blank" style="color:var(--cyan-neon);">Console do Firebase</a> e crie um projeto gratuito.</li>
-                <li>Ative o <strong>Firestore Database</strong> no modo de teste ou configure as regras de leitura/gravação.</li>
-                <li>Em Configurações do Projeto (ícone de engrenagem) > Geral > Seus Aplicativos, adicione um aplicativo Web.</li>
-                <li>Copie as chaves do objeto <code>firebaseConfig</code> e cole nos campos acima.</li>
-              </ol>
-            </div>
           </div>
         </div>
 
