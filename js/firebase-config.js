@@ -7,6 +7,7 @@
 const FirebaseService = (function () {
   const STORAGE_KEY = "escala_firebase_config";
   let db = null;
+  let auth = null;
   let isConnected = false;
   let listeners = [];
 
@@ -60,6 +61,11 @@ const FirebaseService = (function () {
         firebase.initializeApp(config);
       }
       db = firebase.firestore();
+
+      if (firebase.auth) {
+        auth = firebase.auth();
+        console.log("🔐 Firebase Authentication conectado com sucesso!");
+      }
       
       // Habilita persistência offline do Firestore se disponível
       try {
@@ -93,6 +99,7 @@ const FirebaseService = (function () {
     hasValidConfig,
     initFirebase,
     getDb: () => db,
+    getAuth: () => auth,
     isConnected: () => isConnected,
     onStatusChange
   };

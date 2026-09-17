@@ -315,27 +315,120 @@ const StorageService = (function () {
     persist();
   }
 
-  function autenticarAdmin(email, senha) {
-    const admins = getAdministradores();
+  async function autenticarAdmin(email, senha) {
     const cleanEmail = (email || "").trim().toLowerCase();
     const cleanSenha = (senha || "").trim();
 
-    const user = admins.find(
-      (a) => a.email.toLowerCase() === cleanEmail && a.senha === cleanSenha
+    if (!cleanEmail || !cleanSenha) {
+      return { success: false, error: "Informe o e-mail e a senha." };
+    }
+
+    let fbError = null;
+
+    // 1. Tenta autenticar via Firebase Authentication Oficial
+    if (typeof firebase !== "undefined" && firebase.auth) {
+      try {
+        const userCredential = await firebase.auth().signInWithEmailAndPassword(cleanEmail, cleanSenha);
+        if (userCredential && userCredential.user) {
+          const fbUser = userCredential.user;
+          const sessionData = {
+            id: fbUser.uid,
+            nome: fbUser.displayName || cleanEmail.split("@")[0],
+            email: fbUser.email,
+            nivel: "Super Admin",
+            origem: "firebase_auth",
+            loginEm: new Date().toISOString()
+          };
+          localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
+          console.log("✓ Autenticado com sucesso via Firebase Authentication:", fbUser.email);
+          return { success: true, user: sessionData };
+        }
+      } catch (err) {
+        console.warn("Tentativa via Firebase Auth:", err.code, err.message);
+        fbError = err;
+      }
+    }
+
+    // 2. Tenta autenticar via Firestore (caso tenha cadastrado na coleção de administradores)
+    const db = FirebaseService.getDb();
+    if (db) {
+      try {
+        const docSnap = await db.collection("escala_operacional").doc("dados_gerais").get();
+        if (docSnap.exists) {
+          const d = docSnap.data();
+          if (d.administradores && Array.isArray(d.administradores)) {
+            const foundAdmin = d.administradores.find(
+              (a) => a.email && a.email.toLowerCase() === cleanEmail && a.senha === cleanSenha
+            );
+            if (foundAdmin) {
+              const sessionData = {
+                id: foundAdmin.id,
+                nome: foundAdmin.nome,
+                email: foundAdmin.email,
+                nivel: foundAdmin.nivel || "Administrador",
+                origem: "firestore",
+                loginEm: new Date().toISOString()
+              };
+              localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
+              console.log("✓ Autenticado com sucesso via Firestore:", foundAdmin.email);
+              return { success: true, user: sessionData };
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("Consulta a administradores no Firestore falhou:", e);
+      }
+    }
+
+    // 3. Tenta autenticar via banco local (LocalStorage / Cache)
+    const admins = getAdministradores();
+    const localUser = admins.find(
+      (a) => a.email && a.email.toLowerCase() === cleanEmail && a.senha === cleanSenha
     );
 
-    if (user) {
+    if (localUser) {
       const sessionData = {
-        id: user.id,
-        nome: user.nome,
-        email: user.email,
-        nivel: user.nivel || "Administrador",
+        id: localUser.id,
+        nome: localUser.nome,
+        email: localUser.email,
+        nivel: localUser.nivel || "Administrador",
+        origem: "local",
         loginEm: new Date().toISOString()
       };
       localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
-      return sessionData;
+      console.log("✓ Autenticado com sucesso via banco local:", localUser.email);
+      return { success: true, user: sessionData };
     }
-    return null;
+
+    // 4. Credenciais de Emergência / Padrão Inicial
+    if (cleanEmail === "narcisofelizardo@gmail.com" && cleanSenha === "admin") {
+      const sessionData = {
+        id: "admin-narciso",
+        nome: "Narciso Felizardo",
+        email: "narcisofelizardo@gmail.com",
+        nivel: "Super Admin",
+        origem: "default",
+        loginEm: new Date().toISOString()
+      };
+      localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
+      return { success: true, user: sessionData };
+    }
+
+    // Se falhou em tudo, monta mensagem de erro amigável
+    let errorMsg = "E-mail ou senha incorretos.";
+    if (fbError) {
+      if (fbError.code === "auth/invalid-credential" || fbError.code === "auth/wrong-password") {
+        errorMsg = "Senha incorreta. Verifique a senha cadastrada no Firebase.";
+      } else if (fbError.code === "auth/user-not-found") {
+        errorMsg = "Usuário não encontrado no Firebase Authentication.";
+      } else if (fbError.code === "auth/operation-not-allowed") {
+        errorMsg = "Provedor E-mail/Senha não está ativado no Firebase Console.";
+      } else if (fbError.code === "auth/too-many-requests") {
+        errorMsg = "Acesso bloqueado temporariamente por excesso de tentativas. Tente mais tarde.";
+      }
+    }
+
+    return { success: false, error: errorMsg };
   }
 
   function getUsuarioLogado() {
@@ -348,6 +441,9 @@ const StorageService = (function () {
 
   function logout() {
     localStorage.removeItem(SESSION_KEY);
+    if (typeof firebase !== "undefined" && firebase.auth) {
+      firebase.auth().signOut().catch(() => {});
+    }
   }
 
   // CALCULO DE ESCALA MATEMÁTICO (3X3 e ADM)

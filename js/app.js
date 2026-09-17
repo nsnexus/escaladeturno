@@ -801,19 +801,41 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (formLogin) {
-    formLogin.addEventListener("submit", (e) => {
+    formLogin.addEventListener("submit", async (e) => {
       e.preventDefault();
       const email = document.getElementById("loginEmail").value.trim();
       const senha = document.getElementById("loginSenha").value.trim();
+      const submitBtn = formLogin.querySelector("button[type='submit']");
 
-      const user = StorageService.autenticarAdmin(email, senha);
-      if (user) {
-        showToast(`Bem-vindo, ${user.nome}! Redirecionando...`, "success");
-        setTimeout(() => {
-          window.location.href = "admin.html";
-        }, 600);
-      } else {
-        if (loginErrorMsg) loginErrorMsg.style.display = "block";
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Verificando...";
+      }
+      if (loginErrorMsg) loginErrorMsg.style.display = "none";
+
+      try {
+        const res = await StorageService.autenticarAdmin(email, senha);
+        if (res.success) {
+          showToast(`Bem-vindo, ${res.user.nome}! Redirecionando...`, "success");
+          setTimeout(() => {
+            window.location.href = "admin.html";
+          }, 500);
+        } else {
+          if (loginErrorMsg) {
+            loginErrorMsg.textContent = res.error || "E-mail ou senha incorretos.";
+            loginErrorMsg.style.display = "block";
+          }
+        }
+      } catch (err) {
+        if (loginErrorMsg) {
+          loginErrorMsg.textContent = "Erro de autenticação: " + (err.message || err);
+          loginErrorMsg.style.display = "block";
+        }
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Entrar";
+        }
       }
     });
   }

@@ -824,19 +824,41 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (formAdminAuthWall) {
-    formAdminAuthWall.addEventListener("submit", (e) => {
+    formAdminAuthWall.addEventListener("submit", async (e) => {
       e.preventDefault();
       const email = document.getElementById("authWallEmail").value.trim();
       const senha = document.getElementById("authWallSenha").value.trim();
+      const submitBtn = formAdminAuthWall.querySelector("button[type='submit']");
 
-      const user = StorageService.autenticarAdmin(email, senha);
-      if (user) {
-        modalAdminAuthWall.style.display = "none";
-        if (adminUserEmailDisplay) adminUserEmailDisplay.textContent = user.email;
-        showToast(`Autenticado com sucesso como ${user.nome}!`, "success");
-        renderAllAdmin();
-      } else {
-        if (authWallErrorMsg) authWallErrorMsg.style.display = "block";
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Verificando...";
+      }
+      if (authWallErrorMsg) authWallErrorMsg.style.display = "none";
+
+      try {
+        const res = await StorageService.autenticarAdmin(email, senha);
+        if (res.success) {
+          modalAdminAuthWall.style.display = "none";
+          if (adminUserEmailDisplay) adminUserEmailDisplay.textContent = res.user.email;
+          showToast(`Autenticado com sucesso como ${res.user.nome}!`, "success");
+          renderAllAdmin();
+        } else {
+          if (authWallErrorMsg) {
+            authWallErrorMsg.textContent = res.error || "E-mail ou senha incorretos.";
+            authWallErrorMsg.style.display = "block";
+          }
+        }
+      } catch (err) {
+        if (authWallErrorMsg) {
+          authWallErrorMsg.textContent = "Erro de autenticação: " + (err.message || err);
+          authWallErrorMsg.style.display = "block";
+        }
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Entrar";
+        }
       }
     });
   }
