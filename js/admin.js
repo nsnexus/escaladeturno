@@ -702,6 +702,27 @@ document.addEventListener("DOMContentLoaded", () => {
     renderTrucksAdmin();
   });
 
+  // Alternar Tema Claro / Escuro (White / Dark)
+  const btnThemeToggleAdmin = document.getElementById("btnThemeToggleAdmin");
+  function updateThemeButtonAdmin(theme) {
+    if (btnThemeToggleAdmin) {
+      btnThemeToggleAdmin.innerHTML = theme === "light" ? "🌙 Modo Escuro" : "☀️ Modo Claro";
+    }
+  }
+
+  const currentThemeAdmin = localStorage.getItem("escala_theme") || "dark";
+  document.documentElement.setAttribute("data-theme", currentThemeAdmin);
+  updateThemeButtonAdmin(currentThemeAdmin);
+
+  if (btnThemeToggleAdmin) {
+    btnThemeToggleAdmin.addEventListener("click", () => {
+      const active = document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light";
+      document.documentElement.setAttribute("data-theme", active);
+      localStorage.setItem("escala_theme", active);
+      updateThemeButtonAdmin(active);
+    });
+  }
+
   // Inicializa Firebase se configurado e renderiza
   FirebaseService.initFirebase();
   renderAllAdmin();

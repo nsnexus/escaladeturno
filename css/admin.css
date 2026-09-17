@@ -314,3 +314,55 @@
   border-color: var(--cyan-neon);
   box-shadow: 0 0 12px rgba(0, 240, 255, 0.3);
 }
+
+/* Regras de Tema Claro para o Painel Admin */
+[data-theme="light"] .admin-sidebar,
+[data-theme="light"] .admin-card {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .admin-nav-item:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+[data-theme="light"] .admin-nav-item.active {
+  background: rgba(2, 132, 199, 0.1);
+  border-color: rgba(2, 132, 199, 0.4);
+  color: var(--cyan-neon);
+  box-shadow: 0 0 10px rgba(2, 132, 199, 0.15);
+}
+
+[data-theme="light"] .admin-table th {
+  background: #f8fafc;
+  color: #475569;
+  border-color: #e2e8f0;
+}
+
+[data-theme="light"] .admin-table td {
+  border-color: #f1f5f9;
+}
+
+[data-theme="light"] .admin-table tr:hover td {
+  background: #f8fafc;
+}
+
+[data-theme="light"] .truck-editor-card,
+[data-theme="light"] .scale-adjust-box {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+[data-theme="light"] .btn-icon {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #475569;
+}
+
+[data-theme="light"] .btn-icon:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+

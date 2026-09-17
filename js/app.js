@@ -481,6 +481,27 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Alternar Tema Claro / Escuro (White / Dark)
+  const btnThemeToggle = document.getElementById("btnThemeToggle");
+  function updateThemeButton(theme) {
+    if (btnThemeToggle) {
+      btnThemeToggle.innerHTML = theme === "light" ? "🌙 Modo Escuro" : "☀️ Modo Claro";
+    }
+  }
+
+  const currentTheme = localStorage.getItem("escala_theme") || "dark";
+  document.documentElement.setAttribute("data-theme", currentTheme);
+  updateThemeButton(currentTheme);
+
+  if (btnThemeToggle) {
+    btnThemeToggle.addEventListener("click", () => {
+      const active = document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light";
+      document.documentElement.setAttribute("data-theme", active);
+      localStorage.setItem("escala_theme", active);
+      updateThemeButton(active);
+    });
+  }
+
   // Impressão / PDF
   if (btnPrint) {
     btnPrint.addEventListener("click", () => {

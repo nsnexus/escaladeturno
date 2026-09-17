@@ -12,6 +12,13 @@
   
   <!-- Favicon SVG Moderno -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <!-- Script anti-flicker de tema -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('escala_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+  </script>
 </head>
 <body>
 
@@ -43,6 +50,9 @@
 
       <!-- Botões de Ação Rápida -->
       <div class="top-actions">
+        <button class="btn btn-glass" id="btnThemeToggle" title="Alternar entre Tema Claro e Escuro">
+          ☀️ Modo Claro
+        </button>
         <button class="btn btn-glass" id="btnTvMode" title="Alterna rotação automática entre áreas para TVs e Monitores de Sala">
           📺 Modo TV
         </button>
