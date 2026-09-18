@@ -828,7 +828,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 type="text" 
                 id="inputBuscaColab" 
                 class="colab-search-input" 
-                placeholder="Digite seu nome (ex: João, Carlos, Narciso...) ou matrícula..." 
+                placeholder="Digite seu nome (ex: Carlos, Raimundo, Francisco...) ou matrícula..." 
                 autocomplete="off"
               />
               <button type="button" id="btnClearColabSearch" class="colab-search-clear" title="Limpar pesquisa">
