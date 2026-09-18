@@ -2547,3 +2547,43 @@ body::before {
   }
 }
 
+/* ==========================================================================
+   ESTILOS ESPECÍFICOS: ESCALAS EXTRAS & DASHBOARD DE HORAS EXTRAS
+   ========================================================================== */
+.my-extra-banner {
+  animation: pulseExtra 2.5s infinite ease-in-out;
+}
+
+@keyframes pulseExtra {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.12);
+    border-color: #f59e0b;
+  }
+  50% {
+    box-shadow: 0 6px 18px rgba(245, 158, 11, 0.25);
+    border-color: #d97706;
+  }
+}
+
+.day-extra-chip {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.day-extra-chip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(217, 119, 6, 0.25);
+}
+
+@media (max-width: 640px) {
+  .my-extra-banner {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+  
+  .my-extra-banner > span {
+    align-self: flex-start !important;
+  }
+}
+
+

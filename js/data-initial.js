@@ -716,6 +716,9 @@ const INITIAL_DATA = {
     excecoes: {}
   },
 
+  // Escalas Extras & Horas Extras (Extra Rotina, Folgas, Feriados, Prorrogação de Jornada)
+  escalasExtras: [],
+
   // Administradores do Sistema com acesso ao Painel de Gestão
   administradores: [
     {

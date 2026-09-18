@@ -623,6 +623,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <span class="status-text-full">${fullText} ${st.status === 'T' ? `(${turnoTag})` : ''}</span>
           </div>
           ${st.status === 'T' && meuCaminhao ? `<div class="day-truck-chip">🚛 C${meuCaminhao.numero}</div>` : ''}
+          ${st.temExtra ? `<div class="day-extra-chip" style="background:#fef3c7; color:#b45309; font-size:0.68rem; font-weight:800; border-radius:4px; padding:2px 4px; margin-top:3px; border:1px solid #fde68a; display:flex; align-items:center; justify-content:center; gap:3px;" title="Escala Extra: ${st.escalaExtra.tipo} (${st.escalaExtra.horaInicio}-${st.escalaExtra.horaFim}) - ${st.escalaExtra.motivo}"><i class="fa-solid fa-bolt" style="font-size:0.6rem;"></i> +${st.escalaExtra.totalHoras}h Extra</div>` : ''}
         </div>
       `;
     }
@@ -665,6 +666,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let workDays = 0;
     let offDays = 0;
     let nextOffDay = null;
+    let totalHorasExtrasMes = 0;
 
     const today = new Date();
     const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
@@ -680,6 +682,10 @@ document.addEventListener("DOMContentLoaded", () => {
         if (isCurrentMonth && d >= todayDay && !nextOffDay) {
           nextOffDay = d;
         }
+      }
+
+      if (st.temExtra && st.escalaExtra) {
+        totalHorasExtrasMes += parseFloat(st.escalaExtra.totalHoras) || 0;
       }
     }
 
@@ -710,6 +716,12 @@ document.addEventListener("DOMContentLoaded", () => {
         <span class="num" style="color:var(--text-muted);">${offDays}</span>
         <span class="label">Dias de Folga</span>
       </div>
+      ${totalHorasExtrasMes > 0 ? `
+        <div class="calendar-stat-pill" style="border-color: #fde68a; background: #fffbeb;">
+          <span class="num" style="color: #d97706;">+${totalHorasExtrasMes.toFixed(1)}h</span>
+          <span class="label" style="color: #92400e;">Horas Extras</span>
+        </div>
+      ` : ''}
       <div class="calendar-stat-pill">
         <span class="num" style="color:var(--cyan-neon);">${folgaTexto}</span>
         <span class="label">Próxima Folga</span>
@@ -768,6 +780,35 @@ document.addEventListener("DOMContentLoaded", () => {
       statusPillHtml = `<span class="badge badge-cyan" style="font-size:0.85rem; padding:4px 10px;">🔵 ${st.detalhe || 'TREINAMENTO'}</span>`;
     }
 
+    let extraCalloutHtml = "";
+    if (st.temExtra && st.escalaExtra) {
+      const ex = st.escalaExtra;
+      const tipoLabels = {
+        prorrogacao: "Prorrogação de Jornada",
+        folga: "Convocação na Folga (3x3)",
+        feriado: "Plantão Extra de Feriado",
+        especial: "Operação Especial / Parada"
+      };
+      extraCalloutHtml = `
+        <div style="width: 100%; margin-top: 10px; padding: 10px 14px; background: #fffbeb; border: 1.5px solid #fde68a; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 1.25rem; color: #f59e0b;"><i class="fa-solid fa-bolt"></i></span>
+            <div>
+              <div style="font-size: 0.86rem; font-weight: 800; color: #92400e;">
+                ${tipoLabels[ex.tipo] || ex.tipo}: ${ex.horaInicio} às ${ex.horaFim} (+${ex.totalHoras}h extras)
+              </div>
+              <div style="font-size: 0.78rem; color: #78350f; margin-top: 1px;">
+                <strong>Motivo:</strong> ${ex.motivo || 'Rotina operacional'} ${ex.frente ? `• <strong>Local:</strong> ${ex.frente}` : ''}
+              </div>
+            </div>
+          </div>
+          <span style="background: #ffffff; color: #b45309; font-weight: 800; font-size: 0.75rem; padding: 3px 9px; border-radius: 999px; border: 1px solid #fde68a;">
+            ⚡ Convocação Extra Oficial
+          </span>
+        </div>
+      `;
+    }
+
     calendarDayDetails.innerHTML = `
       <div style="flex: 1; min-width: 240px;">
         <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px;">
@@ -787,6 +828,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div>👥 <strong>Dupla:</strong> ${infoDupla}</div>
         </div>
       </div>
+      ${extraCalloutHtml}
     `;
   }
 
@@ -1115,6 +1157,41 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
     }
 
+    // Banner de Alerta de Convocação Extra Hoje
+    let extraAlertBannerHtml = "";
+    if (stHoje.temExtra && stHoje.escalaExtra) {
+      const ex = stHoje.escalaExtra;
+      const tipoNames = {
+        prorrogacao: "Prorrogação de Jornada",
+        folga: "Convocação na Folga (3x3)",
+        feriado: "Plantão Extra de Feriado",
+        especial: "Operação Especial / Parada"
+      };
+      extraAlertBannerHtml = `
+        <div class="my-extra-banner" style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 1.5px solid #f59e0b; border-radius: var(--radius-md); padding: 14px 16px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-shadow: 0 4px 12px rgba(245,158,11,0.15);">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 44px; height: 44px; border-radius: 50%; background: #f59e0b; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; box-shadow: 0 2px 6px rgba(245,158,11,0.3);">
+              <i class="fa-solid fa-bolt"></i>
+            </div>
+            <div>
+              <div style="font-size: 0.74rem; font-weight: 800; color: #b45309; text-transform: uppercase; letter-spacing: 0.5px;">
+                ⚡ Convocação de Escala Extra Hoje!
+              </div>
+              <div style="font-size: 1.05rem; font-weight: 800; color: #92400e; margin-top: 1px;">
+                ${tipoNames[ex.tipo] || ex.tipo}: ${ex.horaInicio} às ${ex.horaFim} (+${ex.totalHoras}h)
+              </div>
+              <div style="font-size: 0.82rem; color: #78350f; margin-top: 2px;">
+                <strong>Motivo:</strong> ${ex.motivo || 'Rotina operacional'} ${ex.frente ? `• <strong>Local:</strong> ${ex.frente}` : ''}
+              </div>
+            </div>
+          </div>
+          <span style="background: #ffffff; color: #b45309; font-weight: 800; font-size: 0.85rem; padding: 4px 12px; border-radius: 999px; border: 1.5px solid #fde68a; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+            +${ex.totalHoras}h extras
+          </span>
+        </div>
+      `;
+    }
+
     // Previsão dos Próximos 7 Dias
     const weekDaysNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
     let timelineCardsHtml = "";
@@ -1150,11 +1227,16 @@ document.addEventListener("DOMContentLoaded", () => {
         tagIcon = `<i class="fa-solid fa-graduation-cap fa-2xs"></i>`;
       }
 
+      const extraTimelineTag = stDia.temExtra && stDia.escalaExtra
+        ? `<div style="margin-top: 4px; font-size: 0.68rem; font-weight: 800; color: #b45309; background: #fef3c7; border: 1px solid #fde68a; border-radius: 4px; padding: 1px 4px; display: flex; align-items: center; justify-content: center; gap: 3px;" title="Escala Extra: ${stDia.escalaExtra.horaInicio}-${stDia.escalaExtra.horaFim}"><i class="fa-solid fa-bolt" style="font-size:0.58rem;"></i> +${stDia.escalaExtra.totalHoras}h</div>`
+        : "";
+
       timelineCardsHtml += `
         <div class="timeline-day-card ${isToday ? 'is-today' : ''}">
           <div class="timeline-day-name">${dayName}</div>
           <div class="timeline-day-date">${dayDateStr}</div>
           <div class="timeline-day-tag ${tagClass}">${tagIcon} ${tagText}</div>
+          ${extraTimelineTag}
         </div>
       `;
     }
@@ -1184,6 +1266,8 @@ document.addEventListener("DOMContentLoaded", () => {
           </button>
         </div>
       </div>
+
+      ${extraAlertBannerHtml}
 
       <div class="my-card-content">
         <div class="my-status-box">

@@ -23,6 +23,11 @@ const StorageService = (function () {
           currentData.administradores = JSON.parse(JSON.stringify(INITIAL_DATA.administradores || []));
           localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(currentData));
         }
+        // Garante que o array de escalas extras existe
+        if (!currentData.escalasExtras || !Array.isArray(currentData.escalasExtras)) {
+          currentData.escalasExtras = [];
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(currentData));
+        }
       } else {
         currentData = JSON.parse(JSON.stringify(INITIAL_DATA));
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(currentData));
@@ -275,6 +280,168 @@ const StorageService = (function () {
     }
   }
 
+  // ==========================================================================
+  // GESTÃO DE ESCALAS EXTRAS & HORAS EXTRAS (EXTRA ROTINA)
+  // ==========================================================================
+
+  function getEscalasExtras(filtros = {}) {
+    const data = getData();
+    let extras = Array.isArray(data.escalasExtras) ? [...data.escalasExtras] : [];
+
+    if (filtros.mesAno) {
+      extras = extras.filter(e => e.data && e.data.startsWith(filtros.mesAno));
+    }
+    if (filtros.area && filtros.area !== "todas") {
+      extras = extras.filter(e => e.area === filtros.area);
+    }
+    if (filtros.colaboradorId) {
+      extras = extras.filter(e => e.colaboradorId === filtros.colaboradorId);
+    }
+    if (filtros.tipo && filtros.tipo !== "todas") {
+      extras = extras.filter(e => e.tipo === filtros.tipo);
+    }
+    if (filtros.data) {
+      extras = extras.filter(e => e.data === filtros.data);
+    }
+
+    return extras.sort((a, b) => (b.data || "").localeCompare(a.data || "") || (b.criadoEm || "").localeCompare(a.criadoEm || ""));
+  }
+
+  function getEscalaExtraById(id) {
+    const data = getData();
+    return (data.escalasExtras || []).find(e => e.id === id) || null;
+  }
+
+  function calcularDiferencaHoras(inicioStr, fimStr) {
+    if (!inicioStr || !fimStr) return 0;
+    const [h1, m1] = inicioStr.split(":").map(Number);
+    const [h2, m2] = fimStr.split(":").map(Number);
+    let min1 = h1 * 60 + (m1 || 0);
+    let min2 = h2 * 60 + (m2 || 0);
+    if (min2 <= min1) {
+      min2 += 24 * 60; // Cruzou a meia-noite
+    }
+    const diff = (min2 - min1) / 60;
+    return parseFloat(diff.toFixed(1));
+  }
+
+  function saveEscalaExtraLote(dadosGerais, colaboradoresIds) {
+    const data = getData();
+    if (!data.escalasExtras) data.escalasExtras = [];
+
+    if (!Array.isArray(colaboradoresIds) || colaboradoresIds.length === 0) {
+      throw new Error("Selecione pelo menos um colaborador para a convocação.");
+    }
+
+    let horas = parseFloat(dadosGerais.totalHoras);
+    if (isNaN(horas) || horas <= 0) {
+      if (dadosGerais.horaInicio && dadosGerais.horaFim) {
+        horas = calcularDiferencaHoras(dadosGerais.horaInicio, dadosGerais.horaFim);
+      } else {
+        horas = 4.0;
+      }
+    }
+
+    const criados = [];
+    const agoraIso = new Date().toISOString();
+
+    colaboradoresIds.forEach(colabId => {
+      const colab = getColaboradorById(colabId);
+      if (!colab) return;
+
+      const novoItem = {
+        id: "extra-" + Date.now() + "-" + Math.random().toString(36).substr(2, 6),
+        colaboradorId: colab.id,
+        colaboradorNome: colab.nome,
+        colaboradorCargo: colab.cargo,
+        area: colab.area,
+        data: dadosGerais.data,
+        tipo: dadosGerais.tipo || "prorrogacao",
+        horaInicio: dadosGerais.horaInicio || "19:00",
+        horaFim: dadosGerais.horaFim || "23:00",
+        totalHoras: horas,
+        motivo: dadosGerais.motivo || "Extra rotina operacional",
+        frente: dadosGerais.frente || (colab.area === "salobo" ? "Usina Salobo" : "Mina Sossego"),
+        criadoPor: dadosGerais.criadoPor || "Gestão Operacional",
+        criadoEm: agoraIso,
+        status: "agendada"
+      };
+
+      data.escalasExtras.push(novoItem);
+      criados.push(novoItem);
+    });
+
+    persist();
+    return criados;
+  }
+
+  function deleteEscalaExtra(id) {
+    const data = getData();
+    if (!data.escalasExtras) return false;
+    const initialLen = data.escalasExtras.length;
+    data.escalasExtras = data.escalasExtras.filter(e => e.id !== id);
+    if (data.escalasExtras.length !== initialLen) {
+      persist();
+      return true;
+    }
+    return false;
+  }
+
+  function calcularDashboardHorasExtras(filtros = {}) {
+    const extras = getEscalasExtras(filtros);
+
+    let totalHoras = 0;
+    let totalConvocoes = extras.length;
+    let horasSossego = 0;
+    let horasSalobo = 0;
+
+    const colabMap = {};
+
+    extras.forEach(e => {
+      const h = parseFloat(e.totalHoras) || 0;
+      totalHoras += h;
+
+      if (e.area === "salobo") {
+        horasSalobo += h;
+      } else {
+        horasSossego += h;
+      }
+
+      if (!colabMap[e.colaboradorId]) {
+        colabMap[e.colaboradorId] = {
+          id: e.colaboradorId,
+          nome: e.colaboradorNome,
+          cargo: e.colaboradorCargo,
+          area: e.area,
+          totalHoras: 0,
+          totalConvocoes: 0,
+          registros: []
+        };
+      }
+      colabMap[e.colaboradorId].totalHoras += h;
+      colabMap[e.colaboradorId].totalConvocoes += 1;
+      colabMap[e.colaboradorId].registros.push(e);
+    });
+
+    const colaboradoresAcionados = Object.keys(colabMap).length;
+    const mediaHorasPorColab = colaboradoresAcionados > 0 
+      ? parseFloat((totalHoras / colaboradoresAcionados).toFixed(1)) 
+      : 0;
+
+    const ranking = Object.values(colabMap).sort((a, b) => b.totalHoras - a.totalHoras);
+
+    return {
+      totalHoras: parseFloat(totalHoras.toFixed(1)),
+      totalConvocoes,
+      colaboradoresAcionados,
+      mediaHorasPorColab,
+      horasSossego: parseFloat(horasSossego.toFixed(1)),
+      horasSalobo: parseFloat(horasSalobo.toFixed(1)),
+      ranking,
+      registros: extras
+    };
+  }
+
   // GESTÃO DE ADMINISTRADORES & AUTENTICAÇÃO
   const SESSION_KEY = "escala_admin_session";
 
@@ -449,70 +616,105 @@ const StorageService = (function () {
     const colab = getColaboradorById(colaboradorId);
     if (!colab) return { status: "F", turno: "FOLGA", detalhe: "Desconhecido" };
 
+    let res = null;
+
     // Se o colaborador estiver marcado globalmente em férias ou atestado
-    if (colab.status === "ferias") return { status: "FE", turno: "FOLGA", detalhe: "Férias" };
-    if (colab.status === "atestado") return { status: "AT", turno: "FOLGA", detalhe: "Atestado" };
-    if (colab.status === "folga") return { status: "F", turno: "FOLGA", detalhe: "Folga Programada" };
-
-    // Verifica exceção cadastrada para essa data específica
-    const excecoes = data.configuracoesEscala?.excecoes || {};
-    if (excecoes[dataIso] && excecoes[dataIso][colaboradorId]) {
-      const exc = excecoes[dataIso][colaboradorId];
-      if (exc === "T") return { status: "T", turno: colab.turnoPadrao || "DIURNO", detalhe: "Trabalho (Ajuste)" };
-      if (exc === "F") return { status: "F", turno: "FOLGA", detalhe: "Folga (Ajuste)" };
-      if (exc === "FE") return { status: "FE", turno: "FOLGA", detalhe: "Férias" };
-      if (exc === "AT") return { status: "AT", turno: "FOLGA", detalhe: "Atestado" };
-      if (exc === "TR") return { status: "TR", turno: "DIURNO", detalhe: "Treinamento" };
-    }
-
-    // Regra Especial para Encarregado / Responsável Geral (não entra em escala, mas trabalha dias úteis e plantão)
-    if (colab.regime === "ESPECIAL" || colab.cargo.toLowerCase().includes("encarregado")) {
-      const d = new Date(dataIso + "T12:00:00");
-      const diaSemana = d.getDay(); // 0 domingo, 6 sabado
-      if (diaSemana === 0) return { status: "F", turno: "FOLGA", detalhe: "Descanso Semanal" };
-      return { status: "T", turno: "GERAL", detalhe: "Supervisão Operacional" };
-    }
-
-    // Regra ADM (Segunda a Sexta)
-    if (colab.regime === "ADM" || colab.situacao.includes("ADM")) {
-      const d = new Date(dataIso + "T12:00:00");
-      const diaSemana = d.getDay();
-      if (diaSemana === 0 || diaSemana === 6) {
-        return { status: "F", turno: "FOLGA", detalhe: "Folga Fim de Semana" };
+    if (colab.status === "ferias") res = { status: "FE", turno: "FOLGA", detalhe: "Férias" };
+    else if (colab.status === "atestado") res = { status: "AT", turno: "FOLGA", detalhe: "Atestado" };
+    else if (colab.status === "folga") res = { status: "F", turno: "FOLGA", detalhe: "Folga Programada" };
+    else {
+      // Verifica exceção cadastrada para essa data específica
+      const excecoes = data.configuracoesEscala?.excecoes || {};
+      if (excecoes[dataIso] && excecoes[dataIso][colaboradorId]) {
+        const exc = excecoes[dataIso][colaboradorId];
+        if (exc === "T") res = { status: "T", turno: colab.turnoPadrao || "DIURNO", detalhe: "Trabalho (Ajuste)" };
+        else if (exc === "F") res = { status: "F", turno: "FOLGA", detalhe: "Folga (Ajuste)" };
+        else if (exc === "FE") res = { status: "FE", turno: "FOLGA", detalhe: "Férias" };
+        else if (exc === "AT") res = { status: "AT", turno: "FOLGA", detalhe: "Atestado" };
+        else if (exc === "TR") res = { status: "TR", turno: "DIURNO", detalhe: "Treinamento" };
       }
-      return { status: "T", turno: "ADM", detalhe: "Expediente Administrativo (07:30 - 17:18)" };
+
+      if (!res) {
+        // Regra Especial para Encarregado / Responsável Geral (não entra em escala, mas trabalha dias úteis e plantão)
+        if (colab.regime === "ESPECIAL" || colab.cargo.toLowerCase().includes("encarregado")) {
+          const d = new Date(dataIso + "T12:00:00");
+          const diaSemana = d.getDay(); // 0 domingo, 6 sabado
+          if (diaSemana === 0) res = { status: "F", turno: "FOLGA", detalhe: "Descanso Semanal" };
+          else res = { status: "T", turno: "GERAL", detalhe: "Supervisão Operacional" };
+        } else if (colab.regime === "ADM" || colab.situacao.includes("ADM")) {
+          // Regra ADM (Segunda a Sexta)
+          const d = new Date(dataIso + "T12:00:00");
+          const diaSemana = d.getDay();
+          if (diaSemana === 0 || diaSemana === 6) {
+            res = { status: "F", turno: "FOLGA", detalhe: "Folga Fim de Semana" };
+          } else {
+            res = { status: "T", turno: "ADM", detalhe: "Expediente Administrativo (07:30 - 17:18)" };
+          }
+        } else {
+          // Regra Ciclo 3x3 (3 dias de trabalho x 3 dias de folga)
+          const dataBaseStr = data.configuracoesEscala?.dataBaseCiclo3x3 || "2026-09-01";
+          const dataBase = new Date(dataBaseStr + "T00:00:00");
+          const dataAlvo = new Date(dataIso + "T00:00:00");
+
+          const diffTime = dataAlvo.getTime() - dataBase.getTime();
+          const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+          // Ciclo completo = 6 dias (3 trabalho + 3 folga)
+          const cicloPos = ((diffDays % 6) + 6) % 6;
+
+          const isTurmaA = (colab.turma3x3 || "A") === "A";
+          const trabalhandoHoje = isTurmaA ? cicloPos < 3 : cicloPos >= 3;
+          const diaNoCiclo = isTurmaA ? (cicloPos < 3 ? cicloPos + 1 : cicloPos - 2) : (cicloPos >= 3 ? cicloPos - 2 : cicloPos + 1);
+
+          const turno = colab.turnoPadrao || (colab.situacao.includes("NOTURNO") ? "NOTURNO" : "DIURNO");
+
+          if (trabalhandoHoje) {
+            res = {
+              status: "T",
+              turno: turno,
+              detalhe: `Trabalho (${diaNoCiclo}º dia de 3) - ${turno}`
+            };
+          } else {
+            res = {
+              status: "F",
+              turno: "FOLGA",
+              detalhe: `Folga (${diaNoCiclo}º dia de 3)`
+            };
+          }
+        }
+      }
     }
 
-    // Regra Ciclo 3x3 (3 dias de trabalho x 3 dias de folga)
-    const dataBaseStr = data.configuracoesEscala?.dataBaseCiclo3x3 || "2026-09-01";
-    const dataBase = new Date(dataBaseStr + "T00:00:00");
-    const dataAlvo = new Date(dataIso + "T00:00:00");
+    // ========================================================================
+    // CHECAGEM DE ESCALA EXTRA / HORA EXTRA CADASTRADA NESTA DATA
+    // ========================================================================
+    const extras = (data.escalasExtras || []).filter(
+      (e) => e.colaboradorId === colaboradorId && e.data === dataIso && e.status !== "cancelada"
+    );
 
-    const diffTime = dataAlvo.getTime() - dataBase.getTime();
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    if (extras.length > 0) {
+      const extra = extras[0];
+      res.temExtra = true;
+      res.escalaExtra = extra;
+      res.escalasExtras = extras;
 
-    // Ciclo completo = 6 dias (3 trabalho + 3 folga)
-    const cicloPos = ((diffDays % 6) + 6) % 6; // 0, 1, 2 = Trabalho Turma A (Folga Turma B); 3, 4, 5 = Folga Turma A (Trabalho Turma B)
-
-    const isTurmaA = (colab.turma3x3 || "A") === "A";
-    const trabalhandoHoje = isTurmaA ? cicloPos < 3 : cicloPos >= 3;
-    const diaNoCiclo = isTurmaA ? (cicloPos < 3 ? cicloPos + 1 : cicloPos - 2) : (cicloPos >= 3 ? cicloPos - 2 : cicloPos + 1);
-
-    const turno = colab.turnoPadrao || (colab.situacao.includes("NOTURNO") ? "NOTURNO" : "DIURNO");
-
-    if (trabalhandoHoje) {
-      return {
-        status: "T",
-        turno: turno,
-        detalhe: `Trabalho (${diaNoCiclo}º dia de 3) - ${turno}`
+      const tipoNomes = {
+        prorrogacao: "Prorrogação de Jornada",
+        folga: "Convocado na Folga",
+        feriado: "Plantão Feriado",
+        especial: "Operação Especial"
       };
-    } else {
-      return {
-        status: "F",
-        turno: "FOLGA",
-        detalhe: `Folga (${diaNoCiclo}º dia de 3)`
-      };
+      const tipoNome = tipoNomes[extra.tipo] || "Escala Extra";
+
+      if (extra.tipo === "folga" && res.status === "F") {
+        res.detalheFolgaOriginal = res.detalhe;
+        res.detalhe = `⚡ ${tipoNome} (${extra.horaInicio} às ${extra.horaFim} • +${extra.totalHoras}h)`;
+      } else {
+        res.detalhe += ` • ⚡ Extra: ${extra.horaInicio}-${extra.horaFim} (+${extra.totalHoras}h)`;
+      }
     }
+
+    return res;
   }
 
   // Inicializa imediatamente
@@ -544,7 +746,13 @@ const StorageService = (function () {
     deleteAdministrador,
     autenticarAdmin,
     getUsuarioLogado,
-    logout
+    logout,
+    getEscalasExtras,
+    getEscalaExtraById,
+    saveEscalaExtraLote,
+    deleteEscalaExtra,
+    calcularDiferencaHoras,
+    calcularDashboardHorasExtras
   };
 })();
 

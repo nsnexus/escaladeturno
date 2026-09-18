@@ -736,12 +736,545 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // ==========================================================================
+  // 9. GESTÃO DE ESCALAS EXTRAS & DASHBOARD DE HORAS EXTRAS
+  // ==========================================================================
+  const navBadgeExtras = document.getElementById("navBadgeExtras");
+  const filterExtrasMesAno = document.getElementById("filterExtrasMesAno");
+  const filterExtrasArea = document.getElementById("filterExtrasArea");
+  const filterExtrasTipo = document.getElementById("filterExtrasTipo");
+  const btnResetFiltrosExtras = document.getElementById("btnResetFiltrosExtras");
+
+  const kpiTotalHorasExtras = document.getElementById("kpiTotalHorasExtras");
+  const kpiTotalConvocoes = document.getElementById("kpiTotalConvocoes");
+  const kpiColabsConvocados = document.getElementById("kpiColabsConvocados");
+  const kpiMediaHoras = document.getElementById("kpiMediaHoras");
+
+  const txtHorasSossego = document.getElementById("txtHorasSossego");
+  const barHorasSossego = document.getElementById("barHorasSossego");
+  const txtHorasSalobo = document.getElementById("txtHorasSalobo");
+  const barHorasSalobo = document.getElementById("barHorasSalobo");
+  const rankingTopColabs = document.getElementById("rankingTopColabs");
+
+  const btnSubTabConsolidado = document.getElementById("btnSubTabConsolidado");
+  const btnSubTabHistorico = document.getElementById("btnSubTabHistorico");
+  const panelConsolidadoColabs = document.getElementById("panelConsolidadoColabs");
+  const panelHistoricoLancamentos = document.getElementById("panelHistoricoLancamentos");
+
+  const tableConsolidadoBody = document.getElementById("tableConsolidadoBody");
+  const tableHistoricoExtrasBody = document.getElementById("tableHistoricoExtrasBody");
+
+  const btnNovaEscalaExtra = document.getElementById("btnNovaEscalaExtra");
+  const btnExportExtrasCsv = document.getElementById("btnExportExtrasCsv");
+
+  // Modal Escala Extra
+  const modalEscalaExtra = document.getElementById("modalEscalaExtra");
+  const formEscalaExtra = document.getElementById("formEscalaExtra");
+  const btnCloseModalExtra = document.getElementById("btnCloseModalExtra");
+  const btnCancelModalExtra = document.getElementById("btnCancelModalExtra");
+
+  const extraData = document.getElementById("extraData");
+  const extraTipo = document.getElementById("extraTipo");
+  const extraHoraInicio = document.getElementById("extraHoraInicio");
+  const extraHoraFim = document.getElementById("extraHoraFim");
+  const extraCalculoPreview = document.getElementById("extraCalculoPreview");
+  const extraQtdDesejada = document.getElementById("extraQtdDesejada");
+  const extraMotivo = document.getElementById("extraMotivo");
+  const extraFrente = document.getElementById("extraFrente");
+  const extraSelectedCounterBadge = document.getElementById("extraSelectedCounterBadge");
+  const extraPickerSearchInput = document.getElementById("extraPickerSearchInput");
+  const extraColabPickerGrid = document.getElementById("extraColabPickerGrid");
+  const extraPickerAreaTabs = document.querySelectorAll("[data-picker-area]");
+
+  let selectedColabIdsForExtra = new Set();
+  let pickerAreaFilter = "todas";
+  let pickerSearchQuery = "";
+
+  // Inicializa mês atual no filtro se vazio
+  if (filterExtrasMesAno && !filterExtrasMesAno.value) {
+    const hoje = new Date();
+    const yyyy = hoje.getFullYear();
+    const mm = String(hoje.getMonth() + 1).padStart(2, "0");
+    filterExtrasMesAno.value = `${yyyy}-${mm}`;
+  }
+
+  function renderHorasExtrasDashboard() {
+    if (!kpiTotalHorasExtras && !tableConsolidadoBody && !tableHistoricoExtrasBody) return;
+
+    const mesAno = filterExtrasMesAno ? filterExtrasMesAno.value : "";
+    const area = filterExtrasArea ? filterExtrasArea.value : "todas";
+    const tipo = filterExtrasTipo ? filterExtrasTipo.value : "todas";
+
+    const dash = StorageService.calcularDashboardHorasExtras({ mesAno, area, tipo });
+
+    // Atualiza KPIs
+    if (kpiTotalHorasExtras) kpiTotalHorasExtras.textContent = `${dash.totalHoras}h`;
+    if (kpiTotalConvocoes) kpiTotalConvocoes.textContent = `${dash.totalConvocoes}`;
+    if (kpiColabsConvocados) kpiColabsConvocados.textContent = `${dash.colaboradoresAcionados}`;
+    if (kpiMediaHoras) kpiMediaHoras.textContent = `${dash.mediaHorasPorColab}h`;
+    if (navBadgeExtras) navBadgeExtras.textContent = dash.totalConvocoes;
+
+    // Comparativo Sossego vs Salobo
+    const pctSossego = dash.totalHoras > 0 ? Math.round((dash.horasSossego / dash.totalHoras) * 100) : 0;
+    const pctSalobo = dash.totalHoras > 0 ? Math.round((dash.horasSalobo / dash.totalHoras) * 100) : 0;
+
+    if (txtHorasSossego) txtHorasSossego.textContent = `${dash.horasSossego}h (${pctSossego}%)`;
+    if (barHorasSossego) barHorasSossego.style.width = `${pctSossego}%`;
+    if (txtHorasSalobo) txtHorasSalobo.textContent = `${dash.horasSalobo}h (${pctSalobo}%)`;
+    if (barHorasSalobo) barHorasSalobo.style.width = `${pctSalobo}%`;
+
+    // Top Ranking
+    if (rankingTopColabs) {
+      if (dash.ranking.length === 0) {
+        rankingTopColabs.innerHTML = `
+          <div style="color:var(--text-dim); font-size:0.85rem; padding:12px; text-align:center;">
+            Nenhuma hora extra registrada para os filtros selecionados.
+          </div>
+        `;
+      } else {
+        const medals = ["🥇", "🥈", "🥉", "4º", "5º"];
+        rankingTopColabs.innerHTML = dash.ranking.slice(0, 5).map((r, idx) => {
+          const isSalobo = r.area === "salobo";
+          const initials = r.nome.split(" ").slice(0, 2).map(n => n[0]).join("");
+          return `
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:6px 10px; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); font-size:0.82rem;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:1.1rem; width:22px; text-align:center;">${medals[idx] || (idx+1)+'º'}</span>
+                <div class="avatar-badge ${isSalobo ? 'salobo' : ''}" style="width:28px; height:28px; font-size:0.75rem;">${initials}</div>
+                <div>
+                  <div style="font-weight:700; color:var(--text-main);">${r.nome}</div>
+                  <div style="font-size:0.72rem; color:var(--text-dim);">${r.cargo} • ${isSalobo ? 'Salobo' : 'Sossego'}</div>
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <span style="font-weight:800; color:var(--amber-neon); font-size:0.9rem;">${r.totalHoras}h</span>
+                <div style="font-size:0.7rem; color:var(--text-dim);">${r.totalConvocoes} convoc.</div>
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+    }
+
+    // Tabela 1: Consolidado por Colaborador
+    if (tableConsolidadoBody) {
+      if (dash.ranking.length === 0) {
+        tableConsolidadoBody.innerHTML = `
+          <tr>
+            <td colspan="7" style="text-align:center; padding:32px; color:var(--text-dim);">
+              Nenhum colaborador com horas extras registradas no período selecionado.
+            </td>
+          </tr>
+        `;
+      } else {
+        const maxHoras = Math.max(...dash.ranking.map(r => r.totalHoras), 1);
+        tableConsolidadoBody.innerHTML = dash.ranking.map(r => {
+          const isSalobo = r.area === "salobo";
+          const initials = r.nome.split(" ").slice(0, 2).map(n => n[0]).join("");
+          const pct = Math.min(100, Math.round((r.totalHoras / maxHoras) * 100));
+
+          return `
+            <tr>
+              <td>
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <div class="avatar-badge ${isSalobo ? 'salobo' : ''}">${initials}</div>
+                  <div>
+                    <div style="font-weight:700; color:var(--text-main);">${r.nome}</div>
+                    <div style="font-size:0.75rem; color:var(--text-dim);">${r.cargo}</div>
+                  </div>
+                </div>
+              </td>
+              <td>${r.cargo}</td>
+              <td>
+                <span class="roster-status-tag ${isSalobo ? 'tag-trabalho' : 'tag-folga'}">
+                  ${isSalobo ? 'Salobo' : 'Sossego'}
+                </span>
+              </td>
+              <td style="text-align:center; font-weight:700;">${r.totalConvocoes}</td>
+              <td style="text-align:center;">
+                <span style="font-weight:800; color:#d97706; background:#fef3c7; border:1px solid #fde68a; padding:3px 8px; border-radius:999px; font-size:0.85rem;">
+                  ⚡ ${r.totalHoras}h
+                </span>
+              </td>
+              <td>
+                <div style="height:8px; background:#e2e8f0; border-radius:999px; overflow:hidden;">
+                  <div style="height:100%; width:${pct}%; background:linear-gradient(90deg, #f59e0b, #d97706); border-radius:999px;"></div>
+                </div>
+              </td>
+              <td style="text-align:center;">
+                <button class="btn btn-glass" style="padding:4px 10px; font-size:0.75rem;" onclick="window.abrirModalComColaborador('${r.id}')" title="Lançar nova convocação extra para este colaborador">
+                  <i class="fa-solid fa-plus"></i> Convocação
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join("");
+      }
+    }
+
+    // Tabela 2: Histórico Detalhado
+    if (tableHistoricoExtrasBody) {
+      if (dash.registros.length === 0) {
+        tableHistoricoExtrasBody.innerHTML = `
+          <tr>
+            <td colspan="8" style="text-align:center; padding:32px; color:var(--text-dim);">
+              Nenhum lançamento de escala extra registrado no período selecionado.
+            </td>
+          </tr>
+        `;
+      } else {
+        tableHistoricoExtrasBody.innerHTML = dash.registros.map(e => {
+          const isSalobo = e.area === "salobo";
+          const [ano, mes, dia] = (e.data || "").split("-");
+          const dataFmt = ano && mes && dia ? `${dia}/${mes}/${ano}` : e.data;
+
+          const tipoLabels = {
+            prorrogacao: "Prorrogação de Jornada",
+            folga: "Convocação na Folga (3x3)",
+            feriado: "Plantão em Feriado",
+            especial: "Operação Especial"
+          };
+
+          const tipoClasses = {
+            prorrogacao: "tag-trabalho",
+            folga: "tag-folga",
+            feriado: "tag-ferias",
+            especial: "tag-atestado"
+          };
+
+          return `
+            <tr>
+              <td><strong style="color:var(--text-main); font-family:var(--font-mono);">${dataFmt}</strong></td>
+              <td>
+                <div style="font-weight:700; color:var(--text-main);">${e.colaboradorNome}</div>
+                <div style="font-size:0.75rem; color:var(--text-dim);">${e.colaboradorCargo}</div>
+              </td>
+              <td>
+                <span class="roster-status-tag ${isSalobo ? 'tag-trabalho' : 'tag-folga'}">
+                  ${isSalobo ? 'Salobo' : 'Sossego'}
+                </span>
+              </td>
+              <td>
+                <span class="roster-status-tag ${tipoClasses[e.tipo] || 'tag-trabalho'}">
+                  ${tipoLabels[e.tipo] || e.tipo}
+                </span>
+              </td>
+              <td><i class="fa-regular fa-clock" style="color:var(--text-dim);"></i> ${e.horaInicio} às ${e.horaFim}</td>
+              <td style="text-align:center;">
+                <span style="font-weight:800; color:#d97706; background:#fef3c7; border:1px solid #fde68a; padding:2px 7px; border-radius:999px; font-size:0.8rem;">
+                  +${e.totalHoras}h
+                </span>
+              </td>
+              <td>
+                <div style="font-size:0.82rem; color:var(--text-main); font-weight:600;">${e.motivo || 'Rotina operacional'}</div>
+                <div style="font-size:0.72rem; color:var(--text-dim);">${e.frente || 'Base operacional'}</div>
+              </td>
+              <td style="text-align:center;">
+                <button class="btn-icon btn-icon-danger" onclick="window.excluirEscalaExtra('${e.id}')" title="Excluir Convocação Extra">
+                  🗑️
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join("");
+      }
+    }
+  }
+
+  function atualizarCalculoHorasModal() {
+    if (!extraHoraInicio || !extraHoraFim || !extraCalculoPreview) return;
+    const diff = StorageService.calcularDiferencaHoras(extraHoraInicio.value, extraHoraFim.value);
+    extraCalculoPreview.innerHTML = `<i class="fa-solid fa-hourglass-half"></i> ${diff.toFixed(1)}h extras`;
+  }
+
+  function atualizarContadorPicker() {
+    if (!extraSelectedCounterBadge) return;
+    const desejada = parseInt(extraQtdDesejada ? extraQtdDesejada.value : "1", 10) || 1;
+    const selecionados = selectedColabIdsForExtra.size;
+
+    const badgeText = `${selecionados} de ${desejada} selecionado(s)`;
+    if (selecionados === desejada) {
+      extraSelectedCounterBadge.style.background = "#dcfce7";
+      extraSelectedCounterBadge.style.color = "#15803d";
+      extraSelectedCounterBadge.innerHTML = `<i class="fa-solid fa-check"></i> ${badgeText} (Meta Atingida)`;
+    } else if (selecionados > desejada) {
+      extraSelectedCounterBadge.style.background = "#fef3c7";
+      extraSelectedCounterBadge.style.color = "#b45309";
+      extraSelectedCounterBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${badgeText} (+${selecionados - desejada})`;
+    } else {
+      extraSelectedCounterBadge.style.background = "#e0f2fe";
+      extraSelectedCounterBadge.style.color = "#0369a1";
+      extraSelectedCounterBadge.innerHTML = `<i class="fa-solid fa-user-plus"></i> ${badgeText} (Faltam ${desejada - selecionados})`;
+    }
+  }
+
+  function renderExtraColabPicker() {
+    if (!extraColabPickerGrid) return;
+    const allColabs = StorageService.getColaboradores(pickerAreaFilter);
+    const q = (pickerSearchQuery || "").toLowerCase().trim();
+    const dataAlvo = extraData ? extraData.value : new Date().toISOString().slice(0, 10);
+
+    const filtrados = allColabs.filter(c => {
+      if (!q) return true;
+      return (
+        c.nome.toLowerCase().includes(q) ||
+        c.cargo.toLowerCase().includes(q) ||
+        (c.matricula && c.matricula.toLowerCase().includes(q))
+      );
+    });
+
+    if (filtrados.length === 0) {
+      extraColabPickerGrid.innerHTML = `
+        <div style="grid-column:1/-1; padding:20px; text-align:center; color:var(--text-dim); font-size:0.82rem;">
+          Nenhum colaborador encontrado com os filtros acima.
+        </div>
+      `;
+      return;
+    }
+
+    extraColabPickerGrid.innerHTML = filtrados.map(c => {
+      const isSelected = selectedColabIdsForExtra.has(c.id);
+      const isSalobo = c.area === "salobo";
+      const initials = c.nome.split(" ").slice(0, 2).map(n => n[0]).join("");
+
+      // Status do colaborador nesta data
+      const stDia = StorageService.calcularStatusDia(c.id, dataAlvo);
+      let statusTagHtml = "";
+      if (stDia.status === "F") {
+        statusTagHtml = `<span style="font-size:0.68rem; font-weight:800; background:#e0f2fe; color:#0369a1; padding:1px 5px; border-radius:4px;"><i class="fa-solid fa-bed"></i> Folga 3x3</span>`;
+      } else if (stDia.status === "T") {
+        statusTagHtml = `<span style="font-size:0.68rem; font-weight:800; background:#fef3c7; color:#b45309; padding:1px 5px; border-radius:4px;"><i class="fa-solid fa-briefcase"></i> Regular (${stDia.turno})</span>`;
+      } else {
+        statusTagHtml = `<span style="font-size:0.68rem; font-weight:800; background:#f3e8ff; color:#7e22ce; padding:1px 5px; border-radius:4px;">${stDia.detalhe}</span>`;
+      }
+
+      return `
+        <label style="display:flex; align-items:center; gap:8px; padding:8px 10px; background:${isSelected ? '#ecfdf5' : '#ffffff'}; border:1px solid ${isSelected ? 'var(--hc-green)' : 'var(--border-subtle)'}; border-radius:var(--radius-sm); cursor:pointer; transition:all 0.2s ease;">
+          <input type="checkbox" class="extra-colab-checkbox" value="${c.id}" ${isSelected ? 'checked' : ''} style="width:16px; height:16px; accent-color:var(--hc-green); cursor:pointer;">
+          <div class="avatar-badge ${isSalobo ? 'salobo' : ''}" style="width:28px; height:28px; font-size:0.75rem; flex-shrink:0;">${initials}</div>
+          <div style="flex:1; min-width:0;">
+            <div style="font-size:0.82rem; font-weight:700; color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${c.nome}</div>
+            <div style="display:flex; align-items:center; gap:4px; margin-top:2px; flex-wrap:wrap;">
+              <span style="font-size:0.7rem; color:var(--text-dim);">${c.cargo}</span>
+              <span>•</span>
+              <span style="font-size:0.7rem; font-weight:700; color:${isSalobo ? 'var(--hc-green-dark)' : '#0369a1'};">${isSalobo ? 'Salobo' : 'Sossego'}</span>
+              ${statusTagHtml}
+            </div>
+          </div>
+        </label>
+      `;
+    }).join("");
+
+    // Adiciona listener aos checkboxes
+    extraColabPickerGrid.querySelectorAll(".extra-colab-checkbox").forEach(chk => {
+      chk.addEventListener("change", (e) => {
+        const id = e.target.value;
+        if (e.target.checked) {
+          selectedColabIdsForExtra.add(id);
+        } else {
+          selectedColabIdsForExtra.delete(id);
+        }
+        atualizarContadorPicker();
+        renderExtraColabPicker();
+      });
+    });
+  }
+
+  function abrirModalNovaEscalaExtra(preSelectColabId = null) {
+    if (formEscalaExtra) formEscalaExtra.reset();
+    selectedColabIdsForExtra.clear();
+
+    const hoje = new Date();
+    const yyyy = hoje.getFullYear();
+    const mm = String(hoje.getMonth() + 1).padStart(2, "0");
+    const dd = String(hoje.getDate()).padStart(2, "0");
+
+    if (extraData) extraData.value = `${yyyy}-${mm}-${dd}`;
+    if (extraTipo) extraTipo.value = "prorrogacao";
+    if (extraHoraInicio) extraHoraInicio.value = "19:00";
+    if (extraHoraFim) extraHoraFim.value = "23:00";
+    if (extraQtdDesejada) extraQtdDesejada.value = "1";
+    if (extraMotivo) extraMotivo.value = "";
+    if (extraFrente) extraFrente.value = "";
+
+    pickerAreaFilter = "todas";
+    pickerSearchQuery = "";
+    if (extraPickerSearchInput) extraPickerSearchInput.value = "";
+
+    extraPickerAreaTabs.forEach(t => {
+      if (t.getAttribute("data-picker-area") === "todas") t.classList.add("active");
+      else t.classList.remove("active");
+    });
+
+    if (preSelectColabId) {
+      selectedColabIdsForExtra.add(preSelectColabId);
+      const c = StorageService.getColaboradorById(preSelectColabId);
+      if (c && extraFrente) {
+        extraFrente.value = c.area === "salobo" ? "Usina Salobo" : "Mina Sossego";
+      }
+    }
+
+    atualizarCalculoHorasModal();
+    atualizarContadorPicker();
+    renderExtraColabPicker();
+
+    if (modalEscalaExtra) modalEscalaExtra.classList.add("open");
+  }
+
+  window.abrirModalComColaborador = function(colabId) {
+    abrirModalNovaEscalaExtra(colabId);
+  };
+
+  function fecharModalEscalaExtra() {
+    if (modalEscalaExtra) modalEscalaExtra.classList.remove("open");
+  }
+
+  window.excluirEscalaExtra = function(id) {
+    const extra = StorageService.getEscalaExtraById(id);
+    const nome = extra ? extra.colaboradorNome : "esta convocação";
+    if (confirm(`Deseja realmente cancelar e excluir a convocação extra de ${nome}?`)) {
+      StorageService.deleteEscalaExtra(id);
+      showToast("Convocação extra excluída com sucesso!", "warning");
+      renderHorasExtrasDashboard();
+    }
+  };
+
+  if (btnSubTabConsolidado && btnSubTabHistorico) {
+    btnSubTabConsolidado.addEventListener("click", () => {
+      btnSubTabConsolidado.classList.add("active");
+      btnSubTabHistorico.classList.remove("active");
+      if (panelConsolidadoColabs) panelConsolidadoColabs.style.display = "block";
+      if (panelHistoricoLancamentos) panelHistoricoLancamentos.style.display = "none";
+    });
+
+    btnSubTabHistorico.addEventListener("click", () => {
+      btnSubTabHistorico.classList.add("active");
+      btnSubTabConsolidado.classList.remove("active");
+      if (panelHistoricoLancamentos) panelHistoricoLancamentos.style.display = "block";
+      if (panelConsolidadoColabs) panelConsolidadoColabs.style.display = "none";
+    });
+  }
+
+  if (filterExtrasMesAno) filterExtrasMesAno.addEventListener("change", renderHorasExtrasDashboard);
+  if (filterExtrasArea) filterExtrasArea.addEventListener("change", renderHorasExtrasDashboard);
+  if (filterExtrasTipo) filterExtrasTipo.addEventListener("change", renderHorasExtrasDashboard);
+
+  if (btnResetFiltrosExtras) {
+    btnResetFiltrosExtras.addEventListener("click", () => {
+      const hoje = new Date();
+      const yyyy = hoje.getFullYear();
+      const mm = String(hoje.getMonth() + 1).padStart(2, "0");
+      if (filterExtrasMesAno) filterExtrasMesAno.value = `${yyyy}-${mm}`;
+      if (filterExtrasArea) filterExtrasArea.value = "todas";
+      if (filterExtrasTipo) filterExtrasTipo.value = "todas";
+      renderHorasExtrasDashboard();
+      showToast("Filtros redefinidos!", "info");
+    });
+  }
+
+  if (btnNovaEscalaExtra) btnNovaEscalaExtra.addEventListener("click", () => abrirModalNovaEscalaExtra());
+  if (btnCloseModalExtra) btnCloseModalExtra.addEventListener("click", fecharModalEscalaExtra);
+  if (btnCancelModalExtra) btnCancelModalExtra.addEventListener("click", fecharModalEscalaExtra);
+
+  if (extraHoraInicio) extraHoraInicio.addEventListener("input", atualizarCalculoHorasModal);
+  if (extraHoraFim) extraHoraFim.addEventListener("input", atualizarCalculoHorasModal);
+  if (extraData) extraData.addEventListener("change", renderExtraColabPicker);
+  if (extraQtdDesejada) extraQtdDesejada.addEventListener("input", atualizarContadorPicker);
+
+  if (extraTipo) {
+    extraTipo.addEventListener("change", () => {
+      if (extraTipo.value === "folga") {
+        extraHoraInicio.value = "07:00";
+        extraHoraFim.value = "19:00";
+      } else if (extraTipo.value === "prorrogacao") {
+        extraHoraInicio.value = "19:00";
+        extraHoraFim.value = "23:00";
+      }
+      atualizarCalculoHorasModal();
+    });
+  }
+
+  extraPickerAreaTabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      extraPickerAreaTabs.forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+      pickerAreaFilter = tab.getAttribute("data-picker-area") || "todas";
+      renderExtraColabPicker();
+    });
+  });
+
+  if (extraPickerSearchInput) {
+    extraPickerSearchInput.addEventListener("input", (e) => {
+      pickerSearchQuery = e.target.value;
+      renderExtraColabPicker();
+    });
+  }
+
+  if (formEscalaExtra) {
+    formEscalaExtra.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (selectedColabIdsForExtra.size === 0) {
+        showToast("Selecione pelo menos um colaborador na lista abaixo!", "warning");
+        return;
+      }
+
+      const dadosGerais = {
+        data: extraData.value,
+        tipo: extraTipo.value,
+        horaInicio: extraHoraInicio.value,
+        horaFim: extraHoraFim.value,
+        totalHoras: StorageService.calcularDiferencaHoras(extraHoraInicio.value, extraHoraFim.value),
+        motivo: extraMotivo.value.trim() || "Extra rotina operacional",
+        frente: extraFrente.value.trim(),
+        criadoPor: StorageService.getUsuarioLogado()?.nome || "Gestão HC Ambiental"
+      };
+
+      try {
+        const salvos = StorageService.saveEscalaExtraLote(dadosGerais, Array.from(selectedColabIdsForExtra));
+        fecharModalEscalaExtra();
+        showToast(`Sucesso! Convocação de escala extra salva para ${salvos.length} colaborador(es)!`, "success");
+        renderHorasExtrasDashboard();
+      } catch (err) {
+        showToast(err.message, "error");
+      }
+    });
+  }
+
+  if (btnExportExtrasCsv) {
+    btnExportExtrasCsv.addEventListener("click", () => {
+      const mesAno = filterExtrasMesAno ? filterExtrasMesAno.value : "";
+      const area = filterExtrasArea ? filterExtrasArea.value : "todas";
+      const tipo = filterExtrasTipo ? filterExtrasTipo.value : "todas";
+
+      const extras = StorageService.getEscalasExtras({ mesAno, area, tipo });
+      if (extras.length === 0) {
+        showToast("Nenhum registro para exportar com os filtros atuais.", "info");
+        return;
+      }
+
+      let csv = "ID;Data;Colaborador;Cargo;Area;Tipo;Inicio;Fim;TotalHoras;Motivo;Frente;CriadoPor;CriadoEm\n";
+      extras.forEach(e => {
+        csv += `"${e.id}";"${e.data}";"${e.colaboradorNome}";"${e.colaboradorCargo}";"${e.area}";"${e.tipo}";"${e.horaInicio}";"${e.horaFim}";"${e.totalHoras}";"${(e.motivo||'').replace(/"/g, '""')}";"${(e.frente||'').replace(/"/g, '""')}";"${e.criadoPor||''}";"${e.criadoEm||''}"\n`;
+      });
+
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `HC_Ambiental_Horas_Extras_${mesAno || 'Geral'}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("Relatório de horas extras exportado em CSV!", "success");
+    });
+  }
+
   // 8. RENDERIZAÇÃO GERAL DO ADMIN
   function renderAllAdmin() {
     renderColaboradoresTable();
     renderTrucksAdmin();
     populateEscalaSelects();
     renderAdminsTable();
+    renderHorasExtrasDashboard();
   }
 
   // Toast Helper
@@ -770,6 +1303,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderColaboradoresTable();
     renderTrucksAdmin();
     renderAdminsTable();
+    renderHorasExtrasDashboard();
   });
 
   // Tema fixo: apenas claro (HC Ambiental)
