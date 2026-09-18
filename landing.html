@@ -3,25 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema Integrado de Escala e Frotas • Sossego & Salobo</title>
-  <meta name="description" content="Plataforma corporativa de gestão de escalas de turno 3x3, alocação de caminhões Volvo FMX e controle de efetivo operacional em tempo real.">
+  <title>HC Ambiental – Sistema Integrado de Escala e Frotas</title>
+  <meta name="description" content="Plataforma corporativa HC Ambiental de gestão de escalas de turno 3x3, alocação de caminhões Volvo FMX e controle de efetivo operacional em tempo real.">
   
   <!-- CSS Design System -->
-  <link rel="stylesheet" href="css/style.css?v=2.3">
-  <link rel="stylesheet" href="css/landing.css?v=2.3">
+  <link rel="stylesheet" href="css/style.css?v=3.0">
+  <link rel="stylesheet" href="css/landing.css?v=3.0">
+
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   
-  <!-- Favicon Corporativo -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
-  
-  <!-- Script anti-flicker de tema -->
+  <!-- Favicon HC Ambiental -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%2300a651'/><text y='.9em' font-size='60' x='18' fill='white'>HC</text></svg>">
+
+  <!-- Forçar tema claro -->
   <script>
-    (function() {
-      const savedTheme = localStorage.getItem('escala_theme') || 'dark';
-      document.documentElement.setAttribute('data-theme', savedTheme);
-    })();
+    document.documentElement.removeAttribute('data-theme');
+    localStorage.removeItem('escala_theme');
   </script>
 </head>
 <body>
@@ -31,7 +33,7 @@
     <!-- ==================== HEADER DA LANDING PAGE ==================== -->
     <header class="top-navbar">
       <div class="brand-section">
-        <div class="brand-logo-badge" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);">⚡</div>
+        <img src="img/logo-hc-ambiental.png" alt="HC Ambiental" class="brand-logo-img">
         <div class="brand-info">
           <h1>
             ESCALA OPERACIONAL
@@ -45,14 +47,11 @@
 
       <div class="top-actions">
         <a href="index.html" class="btn btn-cyan" title="Acessar o Quadro de Escala em Tempo Real">
-          📋 Escala ao Vivo
+          <i class="fa-solid fa-clipboard-list"></i> Escala ao Vivo
         </a>
         <a href="admin.html" class="btn btn-glass" title="Acessar Área Administrativa Restrita">
-          ⚙️ Painel de Gestão
+          <i class="fa-solid fa-gear"></i> Painel de Gestão
         </a>
-        <button class="btn-icon-theme" id="btnThemeToggleLanding" title="Alternar entre Tema Claro e Escuro">
-          ☀️
-        </button>
       </div>
     </header>
 
@@ -71,19 +70,19 @@
         </h1>
 
         <p class="hero-description">
-          Plataforma de alta precisão para monitoramento de turnos 3×3, escalas administrativas e alocação de caminhões pesados Volvo FMX nas minas de Sossego e Salobo. Acesso rápido e integrado no celular, telão operacional ou desktop.
+          Plataforma HC Ambiental de alta precisão para monitoramento de turnos 3×3, escalas administrativas e alocação de caminhões pesados Volvo FMX nas minas de Sossego e Salobo. Acesso rápido e integrado no celular, telão operacional ou desktop.
         </p>
 
         <div class="hero-actions">
           <a href="index.html" class="btn-hero-primary">
-            <span>📋 Acessar Quadro de Escala Completo</span>
-            <span>→</span>
+            <span><i class="fa-solid fa-clipboard-list"></i> Acessar Quadro de Escala Completo</span>
+            <span><i class="fa-solid fa-arrow-right"></i></span>
           </a>
           <a href="#consulta" class="btn-hero-secondary">
-            <span>📱 Consultar Minha Escala no Celular</span>
+            <span><i class="fa-solid fa-mobile-screen"></i> Consultar Minha Escala no Celular</span>
           </a>
           <a href="admin.html" class="btn-hero-secondary" style="border-color: rgba(255,184,0,0.4); color: #fbbf24;">
-            <span>⚙️ Gestão Administrativa</span>
+            <span><i class="fa-solid fa-gear"></i> Gestão Administrativa</span>
           </a>
         </div>
 
@@ -115,7 +114,7 @@
         <div class="quick-check-grid">
           
           <div class="quick-check-form">
-            <h3>🔍 Consulta Rápida de Colaborador</h3>
+            <h3><i class="fa-solid fa-magnifying-glass"></i> Consulta Rápida de Colaborador</h3>
             <p>Selecione seu nome para verificar imediatamente seu turno de hoje, caminhão designado e situação de folga ou trabalho.</p>
 
             <div class="form-group" style="margin-bottom: 16px;">
@@ -127,20 +126,20 @@
 
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
               <button class="btn btn-cyan" id="btnSalvarMeuPerfilLanding" style="flex: 1;">
-                ⭐ Salvar como Meu Perfil
+                <i class="fa-solid fa-star"></i> Salvar como Meu Perfil
               </button>
               <a href="index.html" class="btn btn-glass" style="flex: 1; text-align: center;">
                 Ver no Quadro Completo
               </a>
             </div>
-            <div id="landingSavedNotice" style="display: none; margin-top: 10px; font-size: 0.82rem; color: var(--emerald-neon); font-weight: 600;">
-              ✓ Perfil salvo! Agora o quadro operacional abrirá personalizado para você.
+            <div id="landingSavedNotice" style="display: none; margin-top: 10px; font-size: 0.82rem; color: var(--hc-green); font-weight: 600;">
+              <i class="fa-solid fa-circle-check"></i> Perfil salvo! Agora o quadro operacional abrirá personalizado para você.
             </div>
           </div>
 
           <div class="quick-result-display" id="landingResultBox">
             <div style="text-align: center; color: var(--text-muted);">
-              <div style="font-size: 2.2rem; margin-bottom: 8px;">👤</div>
+              <div style="font-size: 2.5rem; margin-bottom: 12px; color: var(--hc-green);"><i class="fa-solid fa-user-hard-hat"></i></div>
               <p style="font-size: 0.95rem;">Selecione seu nome no menu ao lado para exibir seus detalhes de turno.</p>
             </div>
           </div>
@@ -152,7 +151,7 @@
     <!-- ==================== SEÇÃO: BASES OPERACIONAIS ==================== -->
     <section class="landing-section" id="bases">
       <div class="section-header-center">
-        <h2>🏔️ Bases Operacionais Atendidas</h2>
+        <h2><i class="fa-solid fa-map-location-dot"></i> Bases Operacionais Atendidas</h2>
         <p>Estrutura integrada para controle de frotas e equipes distribuídas nas operações de Sossego e Salobo.</p>
       </div>
 
@@ -189,9 +188,9 @@
           </div>
 
           <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <span class="badge" style="background: rgba(255,255,255,0.05);">Caminhões 01, 02 e 03</span>
-            <span class="badge" style="background: rgba(255,255,255,0.05);">Escala 3x3 Turmas A e B</span>
-            <span class="badge badge-cyan">Base Ativa</span>
+            <span class="badge" style="background: #f1f5f9; color: var(--text-muted); border:1px solid #e2e8f0;">Caminhões 01, 02 e 03</span>
+            <span class="badge" style="background: #f1f5f9; color: var(--text-muted); border:1px solid #e2e8f0;">Escala 3x3 Turmas A e B</span>
+            <span class="badge badge-hc"><i class="fa-solid fa-circle-check"></i> Base Ativa</span>
           </div>
         </div>
 
@@ -227,9 +226,9 @@
           </div>
 
           <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <span class="badge" style="background: rgba(255,255,255,0.05);">Caminhões 04, 05, 06 e 07</span>
-            <span class="badge" style="background: rgba(255,255,255,0.05);">Turnos Diurno / Noturno</span>
-            <span class="badge badge-emerald">Base Ativa</span>
+            <span class="badge" style="background: #f1f5f9; color: var(--text-muted); border:1px solid #e2e8f0;">Caminhões 04, 05, 06 e 07</span>
+            <span class="badge" style="background: #f1f5f9; color: var(--text-muted); border:1px solid #e2e8f0;">Turnos Diurno / Noturno</span>
+            <span class="badge badge-emerald"><i class="fa-solid fa-circle-check"></i> Base Ativa</span>
           </div>
         </div>
       </div>
@@ -239,17 +238,17 @@
     <section class="photo-banner">
       <div class="photo-banner-img" style="background-image: url('img/team-operations.jpg');"></div>
       <div class="photo-banner-content">
-        <span class="badge badge-amber" style="align-self: flex-start; margin-bottom: 12px;">SEGURANÇA & DISCIPLINA</span>
+        <span class="badge badge-amber" style="align-self: flex-start; margin-bottom: 12px;"><i class="fa-solid fa-helmet-safety"></i> SEGURANÇA & DISCIPLINA</span>
         <h3>Tecnologia Integrada ao Chão de Mina</h3>
         <p>
           O sistema foi construído para conectar a liderança operacional, os supervisores de turno e os operadores em campo. Com atualizações instantâneas e visualização sob medida para dispositivos móveis, todos sabem com precisão sua escala, sua turma e seu caminhão com antecedência e clareza.
         </p>
         <div style="display: flex; gap: 12px; flex-wrap: wrap;">
           <a href="index.html" class="btn btn-cyan">
-            Acessar Quadro de Escala
+            <i class="fa-solid fa-clipboard-list"></i> Acessar Quadro de Escala
           </a>
           <a href="admin.html" class="btn btn-glass">
-            Acesso Restrito
+            <i class="fa-solid fa-lock"></i> Acesso Restrito
           </a>
         </div>
       </div>
@@ -258,60 +257,54 @@
     <!-- ==================== RECURSOS DO SISTEMA ==================== -->
     <section class="landing-section" id="recursos">
       <div class="section-header-center">
-        <h2>⚙️ Módulos & Recursos Operacionais</h2>
+        <h2><i class="fa-solid fa-gears"></i> Módulos & Recursos Operacionais</h2>
         <p>Desenvolvido para atender aos rigorosos requisitos de continuidade e produtividade da mineração.</p>
       </div>
 
       <div class="features-grid">
         
-        <!-- Recurso 1 -->
         <div class="feature-card">
-          <div class="feature-icon-box">📅</div>
+          <div class="feature-icon-box"><i class="fa-solid fa-calendar-days"></i></div>
           <h3>Escala 3×3 & Administrativo</h3>
           <p>
             Cálculo automatizado do ciclo de 3 dias de trabalho por 3 dias de folga (Turmas A e B) e escalas administrativas de segunda a sexta, com projeção mensal interativa.
           </p>
         </div>
 
-        <!-- Recurso 2 -->
         <div class="feature-card">
-          <div class="feature-icon-box">🚛</div>
+          <div class="feature-icon-box"><i class="fa-solid fa-truck-moving"></i></div>
           <h3>Alocação de Caminhões & Duplas</h3>
           <p>
             Distribuição em tempo real de motoristas e ajudantes de caminhão para as frotas de Sossego (01 a 03) e Salobo (04 a 07), com status de rota, pátio e manutenção.
           </p>
         </div>
 
-        <!-- Recurso 3 -->
         <div class="feature-card">
-          <div class="feature-icon-box">☁️</div>
+          <div class="feature-icon-box"><i class="fa-solid fa-cloud"></i></div>
           <h3>Sincronização em Nuvem Firebase</h3>
           <p>
             Sincronização multi-dispositivo instantânea via Google Firestore. Qualquer ajuste feito pela supervisão reflete no mesmo segundo em todas as telas conectadas.
           </p>
         </div>
 
-        <!-- Recurso 4 -->
         <div class="feature-card">
-          <div class="feature-icon-box">📱</div>
+          <div class="feature-icon-box"><i class="fa-solid fa-mobile-screen-button"></i></div>
           <h3>Experiência Mobile-First</h3>
           <p>
             Layout otimizado para celulares com cartão exclusivo "Minha Escala", permitindo que cada operador fixe seu nome localmente para consulta com apenas 1 clique.
           </p>
         </div>
 
-        <!-- Recurso 5 -->
         <div class="feature-card">
-          <div class="feature-icon-box">📺</div>
+          <div class="feature-icon-box"><i class="fa-solid fa-tv"></i></div>
           <h3>Modo TV & Sala de Controle</h3>
           <p>
             Visualização ampliada em tela cheia (Fullscreen) para exibição contínua em smart TVs de refeitórios, salas de controle e pontos de concentração operacional.
           </p>
         </div>
 
-        <!-- Recurso 6 -->
         <div class="feature-card">
-          <div class="feature-icon-box">🔐</div>
+          <div class="feature-icon-box"><i class="fa-solid fa-user-shield"></i></div>
           <h3>Gestão Segura de Administradores</h3>
           <p>
             Autenticação restrita com suporte a múltiplos gestores autorizados, permitindo cadastrar novos administradores e gerenciar permissões com total segurança.
@@ -329,11 +322,11 @@
       </p>
       <div class="cta-final-buttons">
         <a href="index.html" class="btn-hero-primary">
-          <span>📋 Abrir Escala Operacional</span>
-          <span>→</span>
+          <span><i class="fa-solid fa-clipboard-list"></i> Abrir Escala Operacional</span>
+          <span><i class="fa-solid fa-arrow-right"></i></span>
         </a>
-        <a href="admin.html" class="btn-hero-secondary" style="border-color: rgba(255, 184, 0, 0.4); color: #fbbf24;">
-          <span>⚙️ Painel Administrativo de Gestão</span>
+        <a href="admin.html" class="btn-hero-secondary" style="border-color: rgba(255, 184, 0, 0.5); color: #d97706;">
+          <span><i class="fa-solid fa-gear"></i> Painel Administrativo de Gestão</span>
         </a>
       </div>
     </section>
@@ -341,7 +334,10 @@
     <!-- ==================== FOOTER ==================== -->
     <footer class="page-footer">
       <div class="footer-credits">
-        Sistema Integrado de Escala de Turno Operacional • <strong>Operações Sossego & Salobo</strong> • Versão 2.2
+        <strong>HC Ambiental</strong> — Sistema Integrado de Escala de Turno Operacional • Versão 3.0
+      </div>
+      <div style="display:flex; align-items:center; gap:6px; font-size:0.78rem; color:var(--hc-green);">
+        <i class="fa-solid fa-leaf"></i> hcambiental.com.br
       </div>
     </footer>
 
@@ -353,9 +349,9 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
   <!-- Scripts -->
-  <script src="js/data-initial.js?v=2.3"></script>
-  <script src="js/firebase-config.js?v=2.3"></script>
-  <script src="js/storage.js?v=2.3"></script>
-  <script src="js/landing.js?v=2.3"></script>
+  <script src="js/data-initial.js?v=3.0"></script>
+  <script src="js/firebase-config.js?v=3.0"></script>
+  <script src="js/storage.js?v=3.0"></script>
+  <script src="js/landing.js?v=3.0"></script>
 </body>
 </html>

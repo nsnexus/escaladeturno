@@ -1130,27 +1130,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Alternar Tema Claro / Escuro (Apenas Ícone no Canto Superior Direito)
-  const btnThemeToggle = document.getElementById("btnThemeToggle");
-  function updateThemeButton(theme) {
-    if (btnThemeToggle) {
-      btnThemeToggle.innerHTML = theme === "light" ? "🌙" : "☀️";
-      btnThemeToggle.title = theme === "light" ? "Mudar para Modo Escuro" : "Mudar para Modo Claro";
-    }
-  }
-
-  const currentTheme = localStorage.getItem("escala_theme") || "dark";
-  document.documentElement.setAttribute("data-theme", currentTheme);
-  updateThemeButton(currentTheme);
-
-  if (btnThemeToggle) {
-    btnThemeToggle.addEventListener("click", () => {
-      const active = document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light";
-      document.documentElement.setAttribute("data-theme", active);
-      localStorage.setItem("escala_theme", active);
-      updateThemeButton(active);
-    });
-  }
+  // Tema fixo: apenas claro (HC Ambiental)
+  document.documentElement.removeAttribute("data-theme");
+  localStorage.removeItem("escala_theme");
 
   // CONTROLE DE ACESSO AO PAINEL DE GESTÃO (LOGIN / SENHA)
   const btnAdminLink = document.getElementById("btnAdminLink");

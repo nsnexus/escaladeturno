@@ -772,27 +772,9 @@ document.addEventListener("DOMContentLoaded", () => {
     renderAdminsTable();
   });
 
-  // Alternar Tema Claro / Escuro (Apenas Ícone no Canto Superior Direito)
-  const btnThemeToggleAdmin = document.getElementById("btnThemeToggleAdmin");
-  function updateThemeButtonAdmin(theme) {
-    if (btnThemeToggleAdmin) {
-      btnThemeToggleAdmin.innerHTML = theme === "light" ? "🌙" : "☀️";
-      btnThemeToggleAdmin.title = theme === "light" ? "Mudar para Modo Escuro" : "Mudar para Modo Claro";
-    }
-  }
-
-  const currentThemeAdmin = localStorage.getItem("escala_theme") || "dark";
-  document.documentElement.setAttribute("data-theme", currentThemeAdmin);
-  updateThemeButtonAdmin(currentThemeAdmin);
-
-  if (btnThemeToggleAdmin) {
-    btnThemeToggleAdmin.addEventListener("click", () => {
-      const active = document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light";
-      document.documentElement.setAttribute("data-theme", active);
-      localStorage.setItem("escala_theme", active);
-      updateThemeButtonAdmin(active);
-    });
-  }
+  // Tema fixo: apenas claro (HC Ambiental)
+  document.documentElement.removeAttribute("data-theme");
+  localStorage.removeItem("escala_theme");
 
   // CONTROLE DE AUTENTICAÇÃO E BLOQUEIO (AUTH WALL)
   const modalAdminAuthWall = document.getElementById("modalAdminAuthWall");

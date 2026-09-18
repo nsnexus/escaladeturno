@@ -4,26 +4,9 @@
  */
 
 document.addEventListener("DOMContentLoaded", () => {
-  // 1. Alternador de Tema (Claro / Escuro)
-  const btnThemeToggle = document.getElementById("btnThemeToggleLanding");
-  function updateThemeButtonIcon(theme) {
-    if (btnThemeToggle) {
-      btnThemeToggle.textContent = theme === "dark" ? "☀️" : "🌙";
-    }
-  }
-
-  const currentTheme = document.documentElement.getAttribute("data-theme") || "dark";
-  updateThemeButtonIcon(currentTheme);
-
-  if (btnThemeToggle) {
-    btnThemeToggle.addEventListener("click", () => {
-      const active = document.documentElement.getAttribute("data-theme") || "dark";
-      const nextTheme = active === "dark" ? "light" : "dark";
-      document.documentElement.setAttribute("data-theme", nextTheme);
-      localStorage.setItem("escala_theme", nextTheme);
-      updateThemeButtonIcon(nextTheme);
-    });
-  }
+  // Tema fixo: apenas claro (HC Ambiental)
+  document.documentElement.removeAttribute("data-theme");
+  localStorage.removeItem("escala_theme");
 
   // 2. Elementos do Widget de Consulta Rápida
   const colabSelect = document.getElementById("landingColabSelect");

@@ -1,13 +1,13 @@
-# ⚡ Sistema de Escala de Turno Operacional (Sossego & Salobo)
+# 🌿 Sistema de Escala de Turno Operacional • HC Ambiental
 
-Sistema completo, moderno e de alta performance ("Top das Galáxias") para gestão e exibição pública de escalas de turno para as operações **Área Sossego (3 Caminhões)** e **Área Salobo (4 Caminhões)**, estruturado com base nos documentos oficiais da operação.
+Sistema moderno, corporativo e de alta performance para gestão e exibição pública de escalas de turno para as operações **Área Sossego (3 Caminhões)** e **Área Salobo (4 Caminhões)**, estruturado de acordo com a identidade visual da **HC Ambiental**.
 
 ---
 
 ## 🚀 Destaques e Recursos do Sistema
 
 1. **Tela de Apresentação / Display TV (`index.html`)**:
-   - **Design Futurista / Dark Industrial**: Glassmorphism, iluminação neon, alta legibilidade e contraste.
+   - **Identidade Visual HC Ambiental**: Paleta exclusiva em tons de verde ecológico (`#00a651`) e azul corporativo (`#3a5bc4`), padrão de tema claro moderno, alta legibilidade e iconografia Font Awesome 6.
    - **Relógio Operacional em Tempo Real**: Exibe hora com segundos, dia por extenso e indicação automática do turno ativo (Diurno das 07h às 19h / Noturno das 19h às 07h).
    - **Frotas & Duplas Operacionais**: Cartões detalhados para cada caminhão (3 em Sossego e 4 em Salobo), exibindo Motorista (com destaque para Carteira Mina), Ajudante de Motorista, modelo do veículo, placa e rota.
    - **Quadro do Efetivo do Dia**: Divisão inteligente em tempo real entre quem está em turno (3x3 ativo), equipe administrativa (ADM comercial) e colaboradores em folga, férias ou licença.

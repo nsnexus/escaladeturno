@@ -1,105 +1,86 @@
 /* ==========================================================================
-   SISTEMA DE ESCALA DE TURNO - DESIGN SYSTEM CORPORATIVO & OPERACIONAL
-   Enterprise Logistics & Mining Operations • Mobile-First Responsive
+   SISTEMA DE ESCALA DE TURNO - DESIGN SYSTEM HC AMBIENTAL
+   HC Ambiental • Operações Sossego & Salobo • Mobile-First Responsive
    ========================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
 
 :root {
-  /* Tema Escuro Corporativo (Executive Slate & Industrial Navy) */
-  --bg-primary: #0b132b;
-  --bg-secondary: #1c2541;
-  --bg-card: #1c2541;
-  --bg-card-hover: #233156;
-  --bg-elevated: #1c2541;
-  --bg-overlay: rgba(11, 19, 43, 0.75);
+  /* ---- Paleta HC Ambiental (Verde + Azul Corporativo) ---- */
+  --hc-green:       #00a651;   /* verde vivo — cor primária da logo */
+  --hc-green-dark:  #007a3b;   /* verde escuro — hover / ativo */
+  --hc-green-light: #e8f7ee;   /* verde clarinho — fundos suaves */
+  --hc-green-mid:   #c3ead3;   /* borda e separadores verdes */
+  --hc-blue:        #3a5bc4;   /* azul da logo */
+  --hc-blue-light:  #eef1fb;   /* azul clarinho */
 
-  /* Acentos Profissionais (Cores Sólidas Sem Brilhos Exagerados) */
-  --cyan-neon: #38bdf8;
-  --cyan-glow: rgba(56, 189, 248, 0.12);
-  --emerald-neon: #22c55e;
-  --emerald-glow: rgba(34, 197, 94, 0.12);
-  --amber-neon: #f59e0b;
-  --amber-glow: rgba(245, 158, 11, 0.12);
-  --coral-neon: #ef4444;
-  --coral-glow: rgba(239, 68, 68, 0.12);
-  --purple-neon: #a855f7;
-  --purple-glow: rgba(168, 85, 247, 0.12);
-  --blue-tech: #3b82f6;
-  --blue-glow: rgba(59, 130, 246, 0.12);
+  /* Backgrounds */
+  --bg-primary:     #f2f7f4;   /* off-white esverdeado */
+  --bg-secondary:   #ffffff;
+  --bg-card:        #ffffff;
+  --bg-card-hover:  #f8fcfa;
+  --bg-elevated:    #ffffff;
+  --bg-overlay:     rgba(0, 50, 20, 0.45);
 
-  /* Gradientes Corporativos Sóbrios */
-  --grad-cyan-blue: linear-gradient(135deg, #0284c7 0%, #1d4ed8 100%);
-  --grad-emerald: linear-gradient(135deg, #16a34a 0%, #0d9488 100%);
-  --grad-amber: linear-gradient(135deg, #d97706 0%, #b45309 100%);
-  --grad-purple: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
-  --grad-dark-card: #1c2541;
+  /* Cores de acento — mantidas funcionais com nova paleta */
+  --cyan-neon:      #00a651;   /* substituído por verde HC */
+  --cyan-glow:      rgba(0, 166, 81, 0.12);
+  --emerald-neon:   #059669;
+  --emerald-glow:   rgba(5, 150, 105, 0.10);
+  --amber-neon:     #d97706;
+  --amber-glow:     rgba(217, 119, 6, 0.10);
+  --coral-neon:     #dc2626;
+  --coral-glow:     rgba(220, 38, 38, 0.10);
+  --purple-neon:    #7c3aed;
+  --purple-glow:    rgba(124, 58, 237, 0.10);
+  --blue-tech:      #3a5bc4;
+  --blue-glow:      rgba(58, 91, 196, 0.10);
 
-  /* Tipografia Corporativa */
+  /* Gradientes HC Ambiental */
+  --grad-primary:   linear-gradient(135deg, #00a651 0%, #007a3b 100%);
+  --grad-blue:      linear-gradient(135deg, #3a5bc4 0%, #2a4aaa 100%);
+  --grad-cyan-blue: linear-gradient(135deg, #00a651 0%, #3a5bc4 100%);
+  --grad-emerald:   linear-gradient(135deg, #059669 0%, #0d9488 100%);
+  --grad-amber:     linear-gradient(135deg, #d97706 0%, #b45309 100%);
+  --grad-purple:    linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+  --grad-dark-card: #ffffff;
+
+  /* Tipografia */
   --font-heading: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-body:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
 
   /* Cores de Texto */
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --text-dim: #64748b;
-  --text-accent: #38bdf8;
+  --text-main:    #1a2e1a;
+  --text-muted:   #4a6a4a;
+  --text-dim:     #6b8a6b;
+  --text-accent:  #00a651;
 
-  /* Bordas e Sombras Corporativas */
-  --border-subtle: #334155;
-  --border-bright: #38bdf8;
-  --glass-blur: none;
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --radius-full: 9999px;
+  /* Bordas e Sombras */
+  --border-subtle: #d0e8d6;
+  --border-bright: #00a651;
+  --glass-blur:    none;
+  --radius-sm:     6px;
+  --radius-md:     10px;
+  --radius-lg:     14px;
+  --radius-full:   9999px;
 
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.3);
-  --shadow-neon-cyan: none;
+  --shadow-sm:  0 1px 4px rgba(0, 80, 30, 0.07);
+  --shadow-md:  0 4px 14px rgba(0, 80, 30, 0.10);
+  --shadow-lg:  0 8px 28px rgba(0, 80, 30, 0.13);
+  --shadow-neon-cyan:    none;
   --shadow-neon-emerald: none;
 }
 
-/* ==========================================================================
-   TEMA CLARO CORPORATIVO (Enterprise Light Mode)
-   ========================================================================== */
-[data-theme="light"] {
-  --bg-primary: #f1f5f9;
-  --bg-secondary: #ffffff;
-  --bg-card: #ffffff;
-  --bg-card-hover: #f8fafc;
-  --bg-elevated: #ffffff;
-  --bg-overlay: rgba(15, 23, 42, 0.45);
+/* Reset Global */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-  --cyan-neon: #0284c7;
-  --cyan-glow: rgba(2, 132, 199, 0.08);
-  --emerald-neon: #16a34a;
-  --emerald-glow: rgba(22, 163, 74, 0.08);
-  --amber-neon: #d97706;
-  --amber-glow: rgba(217, 119, 6, 0.08);
-  --coral-neon: #dc2626;
-  --coral-glow: rgba(220, 38, 38, 0.08);
-  --purple-neon: #7c3aed;
-  --purple-glow: rgba(124, 58, 237, 0.08);
-  --blue-tech: #1d4ed8;
-  --blue-glow: rgba(29, 78, 216, 0.08);
-
-  --grad-cyan-blue: linear-gradient(135deg, #0284c7 0%, #1d4ed8 100%);
-  --grad-emerald: linear-gradient(135deg, #16a34a 0%, #0d9488 100%);
-  --grad-dark-card: #ffffff;
-
-  --text-main: #0f172a;
-  --text-muted: #475569;
-  --text-dim: #64748b;
-  --text-accent: #0284c7;
-
-  --border-subtle: #cbd5e1;
-  --border-bright: #0284c7;
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 6px 18px rgba(0, 0, 0, 0.08);
-  --shadow-neon-cyan: none;
-  --shadow-neon-emerald: none;
+html {
+  color-scheme: light;
 }
 
 body {
@@ -115,148 +96,6 @@ body {
 
 body::before {
   display: none !important;
-}
-
-[data-theme="light"] body {
-  background-color: #f8fafc;
-  color: #0f172a;
-  background-image: none;
-}
-
-[data-theme="light"] body::before {
-  display: none !important;
-}
-
-[data-theme="light"] .brand-info h1 {
-  color: #0f172a;
-  background: none;
-  -webkit-background-clip: unset;
-  -webkit-text-fill-color: unset;
-}
-
-[data-theme="light"] .live-clock-card {
-  background: #ffffff;
-  border-color: #e2e8f0;
-  box-shadow: var(--shadow-sm);
-}
-
-[data-theme="light"] .btn-cyan {
-  color: #ffffff;
-}
-
-[data-theme="light"] .btn-glass {
-  background: rgba(0, 0, 0, 0.04);
-  color: #1e293b;
-  border-color: #e2e8f0;
-}
-
-[data-theme="light"] .btn-glass:hover {
-  background: rgba(0, 0, 0, 0.08);
-  border-color: #cbd5e1;
-}
-
-[data-theme="light"] .search-input {
-  background: #ffffff;
-  border-color: #cbd5e1;
-  color: #0f172a;
-}
-
-[data-theme="light"] .area-tab {
-  background: #f1f5f9;
-  border-color: #e2e8f0;
-  color: #475569;
-}
-
-[data-theme="light"] .area-tab:hover {
-  background: #e2e8f0;
-  color: #0f172a;
-}
-
-[data-theme="light"] .area-tab.active {
-  background: rgba(2, 132, 199, 0.1);
-  border-color: var(--cyan-neon);
-  color: var(--cyan-neon);
-}
-
-[data-theme="light"] .area-tab.active.tab-salobo {
-  background: rgba(5, 150, 105, 0.1);
-  border-color: var(--emerald-neon);
-  color: var(--emerald-neon);
-}
-
-[data-theme="light"] .crew-box,
-[data-theme="light"] .roster-item,
-[data-theme="light"] .table-responsive-wrapper {
-  background: #f8fafc;
-  border-color: #e2e8f0;
-}
-
-[data-theme="light"] .role-icon-circle {
-  background: #ffffff;
-  border-color: #cbd5e1;
-}
-
-[data-theme="light"] .schedule-table th {
-  background: #f1f5f9;
-  color: #334155;
-  border-color: #e2e8f0;
-}
-
-[data-theme="light"] .schedule-table th.col-colab,
-[data-theme="light"] .schedule-table td.col-colab {
-  background: #ffffff;
-  border-right: 2px solid #e2e8f0;
-  color: #0f172a;
-}
-
-[data-theme="light"] .schedule-table td {
-  border-color: #f1f5f9;
-}
-
-[data-theme="light"] .day-cell.cell-t {
-  background: rgba(2, 132, 199, 0.12);
-  color: #0369a1;
-}
-
-[data-theme="light"] .day-cell.cell-f {
-  background: rgba(0, 0, 0, 0.02);
-  color: #94a3b8;
-  opacity: 0.8;
-}
-
-[data-theme="light"] .day-cell.cell-fe {
-  background: rgba(124, 58, 237, 0.12);
-  color: #6d28d9;
-}
-
-[data-theme="light"] .day-cell.cell-at {
-  background: rgba(217, 119, 6, 0.14);
-  color: #b45309;
-}
-
-[data-theme="light"] .day-cell.cell-tr {
-  background: rgba(37, 99, 235, 0.14);
-  color: #1d4ed8;
-}
-
-[data-theme="light"] .form-control {
-  background: #ffffff;
-  border-color: #cbd5e1;
-  color: #0f172a;
-}
-
-[data-theme="light"] .modal-content {
-  background: #ffffff;
-  border-color: #e2e8f0;
-  color: #0f172a;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
-}
-
-/* Reset Global */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
 .app-container {
@@ -277,13 +116,13 @@ body::before {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 20px;
-  padding: 18px 24px;
-  background: var(--bg-card);
-  backdrop-filter: var(--glass-blur);
+  padding: 16px 24px;
+  background: #ffffff;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   margin-bottom: 24px;
+  border-top: 3px solid var(--hc-green);
 }
 
 .brand-section {
@@ -293,23 +132,32 @@ body::before {
 }
 
 .brand-logo-badge {
-  width: 50px;
-  height: 50px;
+  width: 46px;
+  height: 46px;
   border-radius: var(--radius-md);
-  background: #0284c7;
+  background: var(--grad-primary);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #ffffff;
-  font-size: 24px;
+  font-size: 1.1rem;
   font-weight: 800;
   box-shadow: var(--shadow-sm);
   position: relative;
+  overflow: hidden;
+}
+
+/* Logo HC Ambiental no header */
+.brand-logo-img {
+  height: 44px;
+  width: auto;
+  display: block;
+  object-fit: contain;
 }
 
 .brand-info h1 {
   font-family: var(--font-heading);
-  font-size: 1.4rem;
+  font-size: 1.25rem;
   font-weight: 700;
   letter-spacing: -0.01em;
   color: var(--text-main);
@@ -319,7 +167,7 @@ body::before {
 }
 
 .brand-info .subtitle {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: var(--text-muted);
   display: flex;
   align-items: center;
@@ -330,8 +178,14 @@ body::before {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background-color: var(--emerald-neon);
+  background-color: var(--hc-green);
   display: inline-block;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
 
 /* Relógio Digital Operacional */
@@ -339,8 +193,8 @@ body::before {
   display: flex;
   align-items: center;
   gap: 16px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
+  background: var(--hc-green-light);
+  border: 1px solid var(--hc-green-mid);
   padding: 8px 18px;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
@@ -350,12 +204,12 @@ body::before {
   font-family: var(--font-mono);
   font-size: 1.6rem;
   font-weight: 700;
-  color: var(--cyan-neon);
+  color: var(--hc-green);
   letter-spacing: 1px;
 }
 
 .clock-meta {
-  border-left: 1px solid var(--border-subtle);
+  border-left: 1px solid var(--hc-green-mid);
   padding-left: 14px;
 }
 
@@ -370,7 +224,7 @@ body::before {
   font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
-  color: var(--emerald-neon);
+  color: var(--hc-green);
   letter-spacing: 0.5px;
 }
 
@@ -398,66 +252,34 @@ body::before {
 }
 
 .btn-cyan {
-  background: #0284c7;
+  background: var(--grad-primary);
   color: #ffffff;
   box-shadow: var(--shadow-sm);
 }
 
 .btn-cyan:hover {
-  background: #0369a1;
+  background: linear-gradient(135deg, #007a3b 0%, #005c2c 100%);
   transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 .btn-glass {
-  background: rgba(255, 255, 255, 0.05);
+  background: #f8fcfa;
   color: var(--text-main);
   border: 1px solid var(--border-subtle);
 }
 
 .btn-glass:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: var(--border-bright);
+  background: var(--hc-green-light);
+  border-color: var(--hc-green);
+  color: var(--hc-green-dark);
   transform: translateY(-1px);
 }
 
 .btn-active-tv {
-  background: rgba(34, 197, 94, 0.15) !important;
-  border-color: var(--emerald-neon) !important;
-  color: var(--emerald-neon) !important;
-}
-
-/* Botão Reduzido de Alternar Tema (Apenas Ícone) */
-.btn-icon-theme {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid var(--border-subtle);
-  color: var(--text-main);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.25rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-icon-theme:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: var(--border-bright);
-  transform: translateY(-2px);
-}
-
-[data-theme="light"] .btn-icon-theme {
-  background: #ffffff;
-  border-color: #e2e8f0;
-  color: #0f172a;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-}
-
-[data-theme="light"] .btn-icon-theme:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
+  background: rgba(0, 166, 81, 0.12) !important;
+  border-color: var(--hc-green) !important;
+  color: var(--hc-green-dark) !important;
 }
 
 /* ==========================================================================
@@ -472,19 +294,19 @@ body::before {
 }
 
 .stat-card {
-  background: var(--bg-card);
-  backdrop-filter: var(--glass-blur);
+  background: #ffffff;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 18px 20px;
   position: relative;
   overflow: hidden;
-  transition: transform 0.3s ease, border-color 0.3s ease;
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .stat-card:hover {
   transform: translateY(-3px);
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: var(--hc-green-mid);
+  box-shadow: var(--shadow-md);
 }
 
 .stat-card::after {
@@ -497,9 +319,9 @@ body::before {
   background: var(--text-dim);
 }
 
-.stat-card.stat-cyan::after { background: var(--cyan-neon); }
+.stat-card.stat-cyan::after   { background: var(--hc-green); }
 .stat-card.stat-emerald::after { background: var(--emerald-neon); }
-.stat-card.stat-amber::after { background: var(--amber-neon); }
+.stat-card.stat-amber::after  { background: var(--amber-neon); }
 .stat-card.stat-purple::after { background: var(--purple-neon); }
 
 .stat-header {
@@ -510,7 +332,7 @@ body::before {
 }
 
 .stat-title {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.8px;
@@ -518,7 +340,30 @@ body::before {
 }
 
 .stat-icon {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
+  color: var(--hc-green);
+  width: 34px;
+  height: 34px;
+  background: var(--hc-green-light);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-card.stat-emerald .stat-icon {
+  background: rgba(5, 150, 105, 0.10);
+  color: var(--emerald-neon);
+}
+
+.stat-card.stat-amber .stat-icon {
+  background: rgba(217, 119, 6, 0.10);
+  color: var(--amber-neon);
+}
+
+.stat-card.stat-purple .stat-icon {
+  background: rgba(124, 58, 237, 0.10);
+  color: var(--purple-neon);
 }
 
 .stat-value {
@@ -545,7 +390,7 @@ body::before {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 16px;
-  background: var(--bg-card);
+  background: #ffffff;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 12px 18px;
@@ -560,12 +405,12 @@ body::before {
 }
 
 .area-tab {
-  padding: 9px 18px;
-  background: rgba(255, 255, 255, 0.03);
+  padding: 8px 16px;
+  background: #f8fcfa;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-full);
   color: var(--text-muted);
-  font-size: 0.88rem;
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -575,25 +420,26 @@ body::before {
 }
 
 .area-tab:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text-main);
+  background: var(--hc-green-light);
+  color: var(--hc-green-dark);
+  border-color: var(--hc-green-mid);
 }
 
 .area-tab.active {
-  background: rgba(2, 132, 199, 0.15);
-  border-color: var(--cyan-neon);
-  color: var(--cyan-neon);
+  background: var(--hc-green-light);
+  border-color: var(--hc-green);
+  color: var(--hc-green-dark);
 }
 
 .area-tab.active.tab-salobo {
-  background: rgba(34, 197, 94, 0.15);
+  background: rgba(5, 150, 105, 0.10);
   border-color: var(--emerald-neon);
   color: var(--emerald-neon);
 }
 
 .area-badge-count {
-  font-size: 0.75rem;
-  background: rgba(255, 255, 255, 0.1);
+  font-size: 0.72rem;
+  background: rgba(0, 0, 0, 0.07);
   padding: 2px 7px;
   border-radius: 12px;
 }
@@ -606,7 +452,7 @@ body::before {
 .search-input {
   width: 100%;
   padding: 9px 14px 9px 38px;
-  background: rgba(8, 14, 25, 0.8);
+  background: #f8fcfa;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-full);
   color: var(--text-main);
@@ -616,8 +462,9 @@ body::before {
 }
 
 .search-input:focus {
-  border-color: var(--cyan-neon);
-  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2);
+  border-color: var(--hc-green);
+  box-shadow: 0 0 0 3px rgba(0, 166, 81, 0.15);
+  background: #ffffff;
 }
 
 .search-icon {
@@ -625,8 +472,9 @@ body::before {
   left: 13px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--text-dim);
+  color: var(--hc-green);
   pointer-events: none;
+  font-size: 0.85rem;
 }
 
 /* ==========================================================================
@@ -642,7 +490,7 @@ body::before {
 
 .section-title {
   font-family: var(--font-heading);
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -650,14 +498,18 @@ body::before {
   color: var(--text-main);
 }
 
+.section-title i {
+  color: var(--hc-green);
+}
+
 .section-badge {
   font-size: 0.72rem;
   font-weight: 700;
   padding: 3px 9px;
   border-radius: var(--radius-full);
-  background: rgba(2, 132, 199, 0.12);
-  color: var(--cyan-neon);
-  border: 1px solid rgba(2, 132, 199, 0.3);
+  background: var(--hc-green-light);
+  color: var(--hc-green-dark);
+  border: 1px solid var(--hc-green-mid);
 }
 
 .trucks-grid {
@@ -668,19 +520,27 @@ body::before {
 }
 
 .truck-card {
-  background: var(--bg-card);
+  background: #ffffff;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 20px;
   position: relative;
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   overflow: hidden;
 }
 
+.truck-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--grad-primary);
+}
+
 .truck-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--border-bright);
-  box-shadow: var(--shadow-sm);
+  transform: translateY(-3px);
+  border-color: var(--hc-green-mid);
+  box-shadow: var(--shadow-md);
 }
 
 .truck-top {
@@ -700,9 +560,9 @@ body::before {
   width: 44px;
   height: 44px;
   border-radius: var(--radius-sm);
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-subtle);
-  color: var(--cyan-neon);
+  background: var(--hc-green-light);
+  border: 1px solid var(--hc-green-mid);
+  color: var(--hc-green-dark);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -725,6 +585,7 @@ body::before {
   font-family: var(--font-heading);
   font-size: 1.05rem;
   font-weight: 700;
+  color: var(--text-main);
 }
 
 .truck-placa {
@@ -746,39 +607,39 @@ body::before {
 }
 
 .status-em_rota {
-  background: rgba(34, 197, 94, 0.15);
+  background: rgba(5, 150, 105, 0.12);
   color: var(--emerald-neon);
-  border: 1px solid rgba(34, 197, 94, 0.3);
+  border: 1px solid rgba(5, 150, 105, 0.3);
 }
 
 .status-carregamento {
-  background: rgba(245, 158, 11, 0.15);
+  background: rgba(217, 119, 6, 0.12);
   color: var(--amber-neon);
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  border: 1px solid rgba(217, 119, 6, 0.3);
 }
 
 .status-disponivel {
-  background: rgba(56, 189, 248, 0.15);
-  color: var(--cyan-neon);
-  border: 1px solid rgba(56, 189, 248, 0.3);
+  background: var(--hc-green-light);
+  color: var(--hc-green-dark);
+  border: 1px solid var(--hc-green-mid);
 }
 
 .status-manutencao {
-  background: rgba(239, 68, 68, 0.15);
+  background: rgba(220, 38, 38, 0.10);
   color: var(--coral-neon);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  border: 1px solid rgba(220, 38, 38, 0.3);
 }
 
-/* Tripulação do Caminhão (Motorista + Ajudante) */
+/* Tripulação do Caminhão */
 .crew-box {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  background: rgba(8, 14, 25, 0.6);
+  background: #f8fcfa;
   border-radius: var(--radius-sm);
   padding: 12px 14px;
   margin-bottom: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
 }
 
 .crew-member {
@@ -801,10 +662,10 @@ body::before {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9rem;
-  background: rgba(255, 255, 255, 0.05);
+  font-size: 0.85rem;
+  background: #ffffff;
   border: 1px solid var(--border-subtle);
-  color: var(--text-accent);
+  color: var(--hc-green);
 }
 
 .crew-details .name {
@@ -819,8 +680,8 @@ body::before {
 }
 
 .badge-mina {
-  background: rgba(255, 184, 0, 0.15);
-  border: 1px solid rgba(255, 184, 0, 0.4);
+  background: rgba(217, 119, 6, 0.10);
+  border: 1px solid rgba(217, 119, 6, 0.3);
   color: var(--amber-neon);
   font-size: 0.68rem;
   font-weight: 700;
@@ -842,11 +703,11 @@ body::before {
 }
 
 .truck-route-footer strong {
-  color: var(--cyan-neon);
+  color: var(--hc-green);
 }
 
 /* ==========================================================================
-   QUADRO OPERACIONAL DE HOJE (EFETIVO ATIVO NO DIA)
+   QUADRO OPERACIONAL DE HOJE
    ========================================================================== */
 
 .roster-today-grid {
@@ -857,8 +718,7 @@ body::before {
 }
 
 .roster-card {
-  background: var(--bg-card);
-  backdrop-filter: var(--glass-blur);
+  background: #ffffff;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 20px;
@@ -870,16 +730,21 @@ body::before {
   justify-content: space-between;
   margin-bottom: 16px;
   padding-bottom: 12px;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 2px solid var(--hc-green-light);
 }
 
 .roster-card-header h3 {
   font-family: var(--font-heading);
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 700;
   display: flex;
   align-items: center;
   gap: 8px;
+  color: var(--text-main);
+}
+
+.roster-card-header h3 i {
+  color: var(--hc-green);
 }
 
 .roster-list {
@@ -892,31 +757,24 @@ body::before {
 }
 
 /* Custom Scrollbar */
-.roster-list::-webkit-scrollbar {
-  width: 5px;
-}
-.roster-list::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.02);
-}
-.roster-list::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 4px;
-}
+.roster-list::-webkit-scrollbar { width: 5px; }
+.roster-list::-webkit-scrollbar-track { background: var(--hc-green-light); border-radius: 4px; }
+.roster-list::-webkit-scrollbar-thumb { background: var(--hc-green-mid); border-radius: 4px; }
 
 .roster-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 10px 12px;
-  background: rgba(8, 14, 25, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.03);
+  background: #f8fcfa;
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   transition: background 0.2s, border-color 0.2s;
 }
 
 .roster-item:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.1);
+  background: var(--hc-green-light);
+  border-color: var(--hc-green-mid);
 }
 
 .roster-user-info {
@@ -929,8 +787,8 @@ body::before {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: var(--grad-cyan-blue);
-  color: #080c14;
+  background: var(--grad-primary);
+  color: #ffffff;
   font-weight: 700;
   font-size: 0.8rem;
   display: flex;
@@ -963,27 +821,27 @@ body::before {
 }
 
 .tag-trabalho {
-  background: rgba(34, 197, 94, 0.15);
-  color: var(--emerald-neon);
-  border: 1px solid rgba(34, 197, 94, 0.3);
+  background: var(--hc-green-light);
+  color: var(--hc-green-dark);
+  border: 1px solid var(--hc-green-mid);
 }
 
 .tag-folga {
-  background: rgba(148, 163, 184, 0.1);
+  background: rgba(100, 116, 139, 0.08);
   color: var(--text-muted);
-  border: 1px solid rgba(148, 163, 184, 0.2);
+  border: 1px solid #e2e8f0;
 }
 
 .tag-ferias {
-  background: rgba(168, 85, 247, 0.12);
+  background: rgba(124, 58, 237, 0.10);
   color: var(--purple-neon);
-  border: 1px solid rgba(168, 85, 247, 0.3);
+  border: 1px solid rgba(124, 58, 237, 0.25);
 }
 
 .tag-atestado {
-  background: rgba(245, 158, 11, 0.12);
+  background: rgba(217, 119, 6, 0.10);
   color: var(--amber-neon);
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  border: 1px solid rgba(217, 119, 6, 0.25);
 }
 
 /* ==========================================================================
@@ -991,7 +849,7 @@ body::before {
    ========================================================================== */
 
 .schedule-calendar-section {
-  background: var(--bg-card);
+  background: #ffffff;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 24px;
@@ -1042,22 +900,14 @@ body::before {
   border-radius: 3px;
 }
 
-/* ==========================================================================
-   FORMATO DE CALENDÁRIO MENSAL INTERATIVO (MOBILE & DESKTOP)
-   ========================================================================== */
-
-/* Alternador de Visualização: Calendário Mensal vs Tabela Geral */
+/* Alternador de Visualização */
 .calendar-view-switcher {
   display: inline-flex;
-  background: rgba(255, 255, 255, 0.05);
+  background: #f8fcfa;
   padding: 4px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-subtle);
   gap: 4px;
-}
-
-[data-theme="light"] .calendar-view-switcher {
-  background: #f1f5f9;
 }
 
 .view-switch-btn {
@@ -1067,7 +917,7 @@ body::before {
   border: none;
   background: transparent;
   color: var(--text-muted);
-  border-radius: var(--radius-xs);
+  border-radius: calc(var(--radius-sm) - 2px);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -1077,15 +927,16 @@ body::before {
 
 .view-switch-btn:hover {
   color: var(--text-main);
+  background: #ffffff;
 }
 
 .view-switch-btn.active {
-  background: #0284c7;
+  background: var(--grad-primary);
   color: #ffffff;
-  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 166, 81, 0.3);
 }
 
-/* Barra de Seleção de Colaborador para o Calendário */
+/* Barra de Seleção de Colaborador */
 .calendar-colab-picker-bar {
   display: flex;
   align-items: center;
@@ -1093,14 +944,10 @@ body::before {
   flex-wrap: wrap;
   gap: 14px;
   padding: 14px 18px;
-  background: rgba(255, 255, 255, 0.02);
+  background: #f8fcfa;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   margin-bottom: 18px;
-}
-
-[data-theme="light"] .calendar-colab-picker-bar {
-  background: #f8fafc;
 }
 
 .calendar-colab-select {
@@ -1109,14 +956,21 @@ body::before {
   max-width: 460px;
   padding: 10px 14px;
   border-radius: var(--radius-sm);
-  background: var(--bg-card);
+  background: #ffffff;
   border: 1px solid var(--border-subtle);
   color: var(--text-main);
   font-size: 0.9rem;
   font-weight: 600;
+  outline: none;
+  transition: border-color 0.2s;
 }
 
-/* Indicadores / Resumo Mensal do Colaborador */
+.calendar-colab-select:focus {
+  border-color: var(--hc-green);
+  box-shadow: 0 0 0 3px rgba(0, 166, 81, 0.12);
+}
+
+/* Resumo / Indicadores do Mês */
 .calendar-month-stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
@@ -1127,14 +981,10 @@ body::before {
 .calendar-stat-pill {
   padding: 12px 14px;
   border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.03);
+  background: #f8fcfa;
   border: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
-}
-
-[data-theme="light"] .calendar-stat-pill {
-  background: #f8fafc;
 }
 
 .calendar-stat-pill .num {
@@ -1155,7 +1005,7 @@ body::before {
 
 /* Grade do Calendário Mensal */
 .calendar-grid-wrapper {
-  background: var(--bg-card);
+  background: #ffffff;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 16px;
@@ -1188,7 +1038,7 @@ body::before {
 .calendar-day-card {
   min-height: 84px;
   border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.02);
+  background: #fafcfb;
   border: 1px solid var(--border-subtle);
   padding: 8px;
   display: flex;
@@ -1199,26 +1049,22 @@ body::before {
   position: relative;
 }
 
-[data-theme="light"] .calendar-day-card {
-  background: #ffffff;
-  border-color: #e2e8f0;
-}
-
 .calendar-day-card:hover {
   transform: translateY(-2px);
-  border-color: var(--cyan-neon);
+  border-color: var(--hc-green);
   box-shadow: var(--shadow-sm);
+  background: var(--hc-green-light);
 }
 
 .calendar-day-card.is-today {
-  border: 2px solid var(--cyan-neon) !important;
-  box-shadow: 0 0 12px rgba(2, 132, 199, 0.25);
-  background: rgba(2, 132, 199, 0.05);
+  border: 2px solid var(--hc-green) !important;
+  box-shadow: 0 0 12px rgba(0, 166, 81, 0.20);
+  background: var(--hc-green-light);
 }
 
 .calendar-day-card.is-selected {
-  border-color: #38bdf8 !important;
-  background: rgba(56, 189, 248, 0.12) !important;
+  border-color: var(--hc-green) !important;
+  background: rgba(0, 166, 81, 0.08) !important;
 }
 
 .calendar-day-card.is-other-month {
@@ -1243,10 +1089,10 @@ body::before {
 .today-chip {
   font-size: 0.62rem;
   font-weight: 800;
-  padding: 1px 4px;
+  padding: 1px 5px;
   border-radius: 4px;
-  background: var(--cyan-neon);
-  color: #080c14;
+  background: var(--hc-green);
+  color: #ffffff;
   text-transform: uppercase;
 }
 
@@ -1263,45 +1109,39 @@ body::before {
 }
 
 .day-status-box.status-t {
-  background: rgba(34, 197, 94, 0.15);
-  color: var(--emerald-neon);
-  border: 1px solid rgba(34, 197, 94, 0.3);
-}
-
-[data-theme="light"] .day-status-box.status-t {
-  background: rgba(5, 150, 105, 0.12);
-  color: #047857;
-  border-color: rgba(5, 150, 105, 0.25);
+  background: var(--hc-green-light);
+  color: var(--hc-green-dark);
+  border: 1px solid var(--hc-green-mid);
 }
 
 .day-status-box.status-f {
-  background: rgba(148, 163, 184, 0.08);
+  background: rgba(100, 116, 139, 0.07);
   color: var(--text-muted);
-  border: 1px solid rgba(148, 163, 184, 0.15);
+  border: 1px solid #e2e8f0;
 }
 
 .day-status-box.status-fe {
-  background: rgba(168, 85, 247, 0.15);
+  background: rgba(124, 58, 237, 0.10);
   color: var(--purple-neon);
-  border: 1px solid rgba(168, 85, 247, 0.3);
+  border: 1px solid rgba(124, 58, 237, 0.25);
 }
 
 .day-status-box.status-at {
-  background: rgba(245, 158, 11, 0.15);
+  background: rgba(217, 119, 6, 0.10);
   color: var(--amber-neon);
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  border: 1px solid rgba(217, 119, 6, 0.25);
 }
 
 .day-status-box.status-tr {
-  background: rgba(59, 130, 246, 0.15);
-  color: #60a5fa;
-  border: 1px solid rgba(59, 130, 246, 0.3);
+  background: var(--hc-blue-light);
+  color: var(--hc-blue);
+  border: 1px solid rgba(58, 91, 196, 0.25);
 }
 
 .day-truck-chip {
   font-size: 0.65rem;
   font-weight: 700;
-  color: var(--cyan-neon);
+  color: var(--hc-green);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1310,7 +1150,7 @@ body::before {
 
 /* Card Interativo de Detalhes do Dia Selecionado */
 .selected-day-details-panel {
-  background: rgba(255, 255, 255, 0.02);
+  background: #f8fcfa;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   padding: 16px 20px;
@@ -1322,65 +1162,36 @@ body::before {
   margin-top: 14px;
 }
 
-[data-theme="light"] .selected-day-details-panel {
-  background: #f8fafc;
-}
-
 /* Responsividade Mobile para o Calendário */
 @media (max-width: 768px) {
-  .calendar-days-grid {
-    gap: 3px;
-  }
-  .calendar-weekdays-row {
-    gap: 3px;
-  }
-  .calendar-day-card {
-    min-height: 62px;
-    padding: 3px 2px;
-  }
-  .day-num {
-    font-size: 0.78rem;
-  }
-  .today-chip {
-    display: none;
-  }
-  .day-status-box {
-    padding: 2px 1px;
-    font-size: 0.62rem;
-  }
-  .day-status-box .status-text-full {
-    display: none;
-  }
-  .day-status-box .status-text-short {
-    display: inline;
-    font-weight: 800;
-  }
-  .day-truck-chip {
-    font-size: 0.55rem;
-  }
-  .calendar-colab-picker-bar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .calendar-colab-select {
-    max-width: 100%;
-  }
+  .calendar-days-grid { gap: 3px; }
+  .calendar-weekdays-row { gap: 3px; }
+  .calendar-day-card { min-height: 62px; padding: 3px 2px; }
+  .day-num { font-size: 0.78rem; }
+  .today-chip { display: none; }
+  .day-status-box { padding: 2px 1px; font-size: 0.62rem; }
+  .day-status-box .status-text-full { display: none; }
+  .day-status-box .status-text-short { display: inline; font-weight: 800; }
+  .day-truck-chip { font-size: 0.55rem; }
+  .calendar-colab-picker-bar { flex-direction: column; align-items: stretch; }
+  .calendar-colab-select { max-width: 100%; }
 }
+
 @media (min-width: 769px) {
-  .day-status-box .status-text-short {
-    display: none;
-  }
-  .day-status-box .status-text-full {
-    display: inline;
-  }
+  .day-status-box .status-text-short { display: none; }
+  .day-status-box .status-text-full { display: inline; }
 }
+
+/* ==========================================================================
+   TABELA GERAL
+   ========================================================================== */
 
 .table-responsive-wrapper {
   width: 100%;
   overflow-x: auto;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  background: var(--bg-card);
+  background: #ffffff;
 }
 
 .schedule-table {
@@ -1390,20 +1201,21 @@ body::before {
   white-space: nowrap;
 }
 
-.schedule-table th, 
+.schedule-table th,
 .schedule-table td {
   padding: 8px 10px;
   text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
 }
 
 .schedule-table th {
-  background: rgba(16, 26, 48, 0.95);
-  color: var(--text-muted);
-  font-weight: 600;
+  background: var(--hc-green-light);
+  color: var(--hc-green-dark);
+  font-weight: 700;
   position: sticky;
   top: 0;
   z-index: 10;
+  border-color: var(--hc-green-mid);
 }
 
 .schedule-table th.col-colab,
@@ -1411,29 +1223,25 @@ body::before {
   text-align: left;
   position: sticky;
   left: 0;
-  background: #0d1629;
+  background: #ffffff;
   z-index: 15;
   min-width: 220px;
-  border-right: 2px solid var(--border-subtle);
+  border-right: 2px solid var(--hc-green-mid);
+  color: var(--text-main);
+}
+
+.schedule-table th.col-colab {
+  background: var(--hc-green-light);
 }
 
 /* Destaque para linha do colaborador fixado */
 .schedule-table tr.my-colab-row td {
-  background: rgba(56, 189, 248, 0.08);
+  background: rgba(0, 166, 81, 0.06);
 }
 
 .schedule-table tr.my-colab-row td.col-colab {
-  background: #172554 !important;
-  border-left: 3px solid var(--cyan-neon);
-}
-
-[data-theme="light"] .schedule-table tr.my-colab-row td {
-  background: #f0f9ff;
-}
-
-[data-theme="light"] .schedule-table tr.my-colab-row td.col-colab {
-  background: #e0f2fe !important;
-  border-left: 3px solid var(--cyan-neon);
+  background: var(--hc-green-light) !important;
+  border-left: 3px solid var(--hc-green);
 }
 
 .schedule-table th.col-cargo,
@@ -1444,9 +1252,9 @@ body::before {
 }
 
 .schedule-table th.today-header {
-  background: rgba(2, 132, 199, 0.15);
-  color: var(--cyan-neon);
-  border-bottom: 2px solid var(--cyan-neon);
+  background: var(--hc-green-light);
+  color: var(--hc-green-dark);
+  border-bottom: 2px solid var(--hc-green);
 }
 
 .day-cell {
@@ -1459,33 +1267,33 @@ body::before {
 }
 
 .cell-t {
-  background: rgba(2, 132, 199, 0.2);
-  color: var(--cyan-neon);
+  background: var(--hc-green-light);
+  color: var(--hc-green-dark);
 }
 
 .cell-f {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(100, 116, 139, 0.05);
   color: var(--text-dim);
-  opacity: 0.6;
+  opacity: 0.8;
 }
 
 .cell-fe {
-  background: rgba(168, 85, 247, 0.25);
-  color: #d8b4fe;
+  background: rgba(124, 58, 237, 0.12);
+  color: var(--purple-neon);
 }
 
 .cell-at {
-  background: rgba(245, 158, 11, 0.25);
-  color: #fde047;
+  background: rgba(217, 119, 6, 0.14);
+  color: #b45309;
 }
 
 .cell-tr {
-  background: rgba(59, 130, 246, 0.25);
-  color: #93c5fd;
+  background: var(--hc-blue-light);
+  color: var(--hc-blue);
 }
 
 .cell-today {
-  outline: 2px solid var(--cyan-neon);
+  outline: 2px solid var(--hc-green);
   outline-offset: -2px;
 }
 
@@ -1495,11 +1303,9 @@ body::before {
 
 .modal-backdrop {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: var(--bg-overlay);
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0, 50, 20, 0.40);
   backdrop-filter: blur(4px);
   z-index: 1000;
   display: none;
@@ -1513,7 +1319,7 @@ body::before {
 }
 
 .modal-content {
-  background: var(--bg-elevated);
+  background: #ffffff;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   padding: 28px;
@@ -1523,6 +1329,7 @@ body::before {
   position: relative;
   max-height: 90vh;
   overflow-y: auto;
+  border-top: 3px solid var(--hc-green);
 }
 
 .modal-header {
@@ -1552,10 +1359,17 @@ body::before {
   cursor: pointer;
   line-height: 1;
   transition: color 0.2s;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .modal-close-btn:hover {
   color: var(--coral-neon);
+  background: rgba(220, 38, 38, 0.08);
 }
 
 .form-group {
@@ -1575,7 +1389,7 @@ body::before {
 .form-control {
   width: 100%;
   padding: 10px 14px;
-  background: rgba(8, 14, 25, 0.9);
+  background: #f8fcfa;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   color: var(--text-main);
@@ -1586,8 +1400,9 @@ body::before {
 }
 
 .form-control:focus {
-  border-color: var(--cyan-neon);
-  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2);
+  border-color: var(--hc-green);
+  box-shadow: 0 0 0 3px rgba(0, 166, 81, 0.12);
+  background: #ffffff;
 }
 
 .modal-footer {
@@ -1598,6 +1413,39 @@ body::before {
   margin-top: 24px;
   padding-top: 16px;
   border-top: 1px solid var(--border-subtle);
+}
+
+/* ==========================================================================
+   BADGES GENÉRICOS
+   ========================================================================== */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 5px;
+  gap: 4px;
+}
+
+.badge-cyan,
+.badge-hc {
+  background: var(--hc-green-light);
+  color: var(--hc-green-dark);
+  border: 1px solid var(--hc-green-mid);
+}
+
+.badge-emerald {
+  background: rgba(5, 150, 105, 0.10);
+  color: var(--emerald-neon);
+  border: 1px solid rgba(5, 150, 105, 0.25);
+}
+
+.badge-amber {
+  background: rgba(217, 119, 6, 0.10);
+  color: var(--amber-neon);
+  border: 1px solid rgba(217, 119, 6, 0.25);
 }
 
 /* ==========================================================================
@@ -1617,19 +1465,21 @@ body::before {
 }
 
 .footer-credits strong {
-  color: var(--text-muted);
+  color: var(--hc-green-dark);
+  font-weight: 700;
 }
 
 .cloud-status-indicator {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--hc-green-light);
   padding: 6px 14px;
   border-radius: var(--radius-full);
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--hc-green-mid);
   font-family: var(--font-mono);
   font-size: 0.75rem;
+  color: var(--hc-green-dark);
 }
 
 /* ==========================================================================
@@ -1647,8 +1497,8 @@ body::before {
 }
 
 .toast {
-  background: var(--bg-elevated);
-  border-left: 4px solid var(--cyan-neon);
+  background: #ffffff;
+  border-left: 4px solid var(--hc-green);
   border-radius: var(--radius-sm);
   padding: 12px 18px;
   color: var(--text-main);
@@ -1659,18 +1509,23 @@ body::before {
   gap: 10px;
   animation: slideInRight 0.3s ease-out;
   min-width: 280px;
+  border: 1px solid var(--border-subtle);
+  border-left: 4px solid var(--hc-green);
 }
 
-.toast-success { border-color: var(--emerald-neon); }
-.toast-error { border-color: var(--coral-neon); }
-.toast-warning { border-color: var(--amber-neon); }
+.toast-success { border-left-color: var(--emerald-neon); }
+.toast-error   { border-left-color: var(--coral-neon); }
+.toast-warning { border-left-color: var(--amber-neon); }
 
 @keyframes slideInRight {
   from { opacity: 0; transform: translateX(50px); }
-  to { opacity: 1; transform: translateX(0); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
-/* Responsividade Mobile e Telas Maiores */
+/* ==========================================================================
+   RESPONSIVIDADE MOBILE
+   ========================================================================== */
+
 @media (max-width: 768px) {
   .app-container {
     padding: 10px 10px 40px 10px;
@@ -1712,11 +1567,11 @@ body::before {
 }
 
 /* ==========================================================================
-   MINHA ESCALA / PERFIL PESSOAL SALVO LOCALMENTE (MOBILE-OPTIMIZED)
+   MINHA ESCALA / PERFIL PESSOAL
    ========================================================================== */
 
 .personal-schedule-hero {
-  background: var(--bg-card);
+  background: #ffffff;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 18px 20px;
@@ -1724,6 +1579,7 @@ body::before {
   position: relative;
   box-shadow: var(--shadow-sm);
   transition: all 0.2s ease;
+  border-top: 3px solid var(--hc-green);
 }
 
 .personal-hero-header {
@@ -1750,8 +1606,8 @@ body::before {
   font-size: 0.72rem;
   padding: 3px 8px;
   border-radius: var(--radius-full);
-  background: rgba(56, 189, 248, 0.12);
-  color: var(--cyan-neon);
+  background: var(--hc-green-light);
+  color: var(--hc-green-dark);
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -1767,13 +1623,19 @@ body::before {
   flex: 1;
   min-width: 240px;
   padding: 10px 14px;
-  background: var(--bg-elevated);
+  background: #f8fcfa;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   color: var(--text-main);
   font-size: 0.95rem;
   font-weight: 600;
   outline: none;
+  transition: border-color 0.2s;
+}
+
+.personal-select:focus {
+  border-color: var(--hc-green);
+  box-shadow: 0 0 0 3px rgba(0, 166, 81, 0.12);
 }
 
 /* Card Ativo do Colaborador */
@@ -1809,15 +1671,15 @@ body::before {
 }
 
 .my-status-badge.trabalho {
-  background: rgba(34, 197, 94, 0.15);
-  color: var(--emerald-neon);
-  border: 1px solid var(--emerald-neon);
+  background: var(--hc-green-light);
+  color: var(--hc-green-dark);
+  border: 1px solid var(--hc-green);
 }
 
 .my-status-badge.folga {
-  background: rgba(100, 116, 139, 0.15);
+  background: rgba(100, 116, 139, 0.08);
   color: var(--text-muted);
-  border: 1px solid var(--border-subtle);
+  border: 1px solid #e2e8f0;
 }
 
 .my-details-grid {
@@ -1825,15 +1687,10 @@ body::before {
   grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 12px;
   margin-top: 14px;
-  background: rgba(0, 0, 0, 0.12);
+  background: #f8fcfa;
   padding: 12px 14px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-subtle);
-}
-
-[data-theme="light"] .my-details-grid {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
 }
 
 .my-detail-item .label {
@@ -1886,7 +1743,7 @@ body::before {
 }
 
 .timeline-day-card {
-  background: var(--bg-elevated);
+  background: #f8fcfa;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   padding: 8px 6px;
@@ -1895,8 +1752,8 @@ body::before {
 }
 
 .timeline-day-card.is-today {
-  border-color: var(--cyan-neon);
-  background: rgba(56, 189, 248, 0.08);
+  border-color: var(--hc-green);
+  background: var(--hc-green-light);
 }
 
 .timeline-day-name {
@@ -1921,11 +1778,11 @@ body::before {
 }
 
 .timeline-day-tag.tag-t {
-  background: rgba(34, 197, 94, 0.18);
-  color: var(--emerald-neon);
+  background: var(--hc-green-light);
+  color: var(--hc-green-dark);
 }
 
 .timeline-day-tag.tag-f {
-  background: rgba(100, 116, 139, 0.15);
+  background: rgba(100, 116, 139, 0.10);
   color: var(--text-muted);
 }

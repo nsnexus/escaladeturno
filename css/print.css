@@ -59,6 +59,12 @@
     border: 1px solid #000 !important;
   }
 
+  .brand-logo-img {
+    height: 42px !important;
+    width: auto !important;
+    display: inline-block !important;
+  }
+
   .brand-info h1 {
     font-size: 16pt !important;
     color: #000 !important;
