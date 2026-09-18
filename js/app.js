@@ -12,7 +12,10 @@ document.addEventListener("DOMContentLoaded", () => {
     currentMonth: new Date().getMonth(), // 0 = Jan, 8 = Setembro, etc.
     tvModeActive: false,
     tvRotationInterval: null,
-    tvStep: 0
+    tvStep: 0,
+    calendarMode: "calendar", // "calendar" (padrao mobile) ou "table"
+    selectedCalendarColabId: localStorage.getItem("escala_meu_colaborador_id") || null,
+    selectedCalendarDay: new Date().getDate()
   };
 
   // Elementos do DOM
@@ -34,6 +37,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const prevMonthBtn = document.getElementById("prevMonthBtn");
   const nextMonthBtn = document.getElementById("nextMonthBtn");
   const currentMonthBtn = document.getElementById("currentMonthBtn");
+
+  // Elementos da Nova Visualização em Formato Calendário (Mobile & Desktop)
+  const btnViewCalendar = document.getElementById("btnViewCalendar");
+  const btnViewTable = document.getElementById("btnViewTable");
+  const calendarGridContainer = document.getElementById("calendarGridContainer");
+  const calendarTableContainer = document.getElementById("calendarTableContainer");
+  const calendarColabSelect = document.getElementById("calendarColabSelect");
+  const btnUseMyProfileCalendar = document.getElementById("btnUseMyProfileCalendar");
+  const calendarMonthStats = document.getElementById("calendarMonthStats");
+  const calendarDaysGrid = document.getElementById("calendarDaysGrid");
+  const calendarDayDetails = document.getElementById("calendarDayDetails");
 
   // Status de Nuvem
   const cloudStatusBadge = document.getElementById("cloudStatusBadge");
@@ -385,6 +399,313 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ==========================================================================
+  // FORMATO DE CALENDÁRIO MENSAL (MOBILE & DESKTOP FIRST)
+  // ==========================================================================
+
+  function populateCalendarColabSelect() {
+    if (!calendarColabSelect) return;
+
+    const allColabs = StorageService.getColaboradores("todas");
+    const sossegoColabs = allColabs.filter(c => c.area === "sossego").sort((a, b) => a.nome.localeCompare(b.nome));
+    const saloboColabs = allColabs.filter(c => c.area === "salobo").sort((a, b) => a.nome.localeCompare(b.nome));
+
+    // Determinar colaborador padrão: salvo no celular ou primeiro de Sossego
+    const savedId = localStorage.getItem("escala_meu_colaborador_id");
+    if (savedId && allColabs.some(c => c.id === savedId)) {
+      state.selectedCalendarColabId = savedId;
+    } else if (!state.selectedCalendarColabId && allColabs.length > 0) {
+      state.selectedCalendarColabId = allColabs[0].id;
+    }
+
+    let optionsHtml = "";
+    optionsHtml += `<optgroup label="Área Sossego (18 Colaboradores)">`;
+    sossegoColabs.forEach(c => {
+      const isSaved = c.id === savedId;
+      optionsHtml += `<option value="${c.id}" ${c.id === state.selectedCalendarColabId ? 'selected' : ''}>${c.nome} • ${c.cargo} (Turma ${c.turma3x3 || 'A'})${isSaved ? ' ⭐' : ''}</option>`;
+    });
+    optionsHtml += `</optgroup>`;
+
+    optionsHtml += `<optgroup label="Área Salobo (18 Colaboradores)">`;
+    saloboColabs.forEach(c => {
+      const isSaved = c.id === savedId;
+      optionsHtml += `<option value="${c.id}" ${c.id === state.selectedCalendarColabId ? 'selected' : ''}>${c.nome} • ${c.cargo} (Turma ${c.turma3x3 || 'A'})${isSaved ? ' ⭐' : ''}</option>`;
+    });
+    optionsHtml += `</optgroup>`;
+
+    calendarColabSelect.innerHTML = optionsHtml;
+  }
+
+  function renderCalendarGrid() {
+    if (!calendarDaysGrid) return;
+
+    const allColabs = StorageService.getColaboradores("todas");
+    if (!allColabs.length) return;
+
+    // Se o colaborador selecionado não existir, pega o primeiro
+    let colab = allColabs.find(c => c.id === state.selectedCalendarColabId);
+    if (!colab) {
+      colab = allColabs[0];
+      state.selectedCalendarColabId = colab.id;
+    }
+
+    const year = state.currentYear;
+    const month = state.currentMonth;
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDayIndex = new Date(year, month, 1).getDay(); // 0 = Domingo, 6 = Sábado
+    const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+    const today = new Date();
+    const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
+    const todayDay = today.getDate();
+
+    // Atualiza o mês exibido
+    const monthDate = new Date(year, month, 1);
+    const monthName = monthDate.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+    if (currentMonthDisplayEl) {
+      currentMonthDisplayEl.textContent = monthName;
+    }
+
+    // Renderiza Resumo do Mês
+    renderCalendarMonthStats(colab, year, month);
+
+    // Renderiza Grade de Dias
+    let gridHtml = "";
+
+    // 1. Dias residuais do mês anterior
+    for (let i = 0; i < firstDayIndex; i++) {
+      const prevDayNum = daysInPrevMonth - firstDayIndex + 1 + i;
+      gridHtml += `
+        <div class="calendar-day-card is-other-month">
+          <div class="day-header">
+            <span class="day-num" style="color:var(--text-dim);">${prevDayNum}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    // Busca caminhões para associar
+    const trucks = StorageService.getCaminhoes();
+    const meuCaminhao = trucks.find(t => t.motoristaId === colab.id || t.ajudanteId === colab.id);
+
+    // Garante que o dia selecionado é válido no mês
+    if (state.selectedCalendarDay > daysInMonth) {
+      state.selectedCalendarDay = 1;
+    }
+    if (isCurrentMonth && !state.selectedCalendarDay) {
+      state.selectedCalendarDay = todayDay;
+    }
+
+    // 2. Dias do mês atual
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateIso = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+      const st = StorageService.calcularStatusDia(colab.id, dateIso);
+      const isToday = isCurrentMonth && d === todayDay;
+      const isSelected = d === state.selectedCalendarDay;
+
+      let statusBoxClass = "status-t";
+      let shortText = "T";
+      let fullText = "Trabalho";
+
+      if (st.status === "F") {
+        statusBoxClass = "status-f";
+        shortText = "F";
+        fullText = "Folga";
+      } else if (st.status === "FE") {
+        statusBoxClass = "status-fe";
+        shortText = "FE";
+        fullText = "Férias";
+      } else if (st.status === "AT") {
+        statusBoxClass = "status-at";
+        shortText = "AT";
+        fullText = "Atestado";
+      } else if (st.status === "TR") {
+        statusBoxClass = "status-tr";
+        shortText = "TR";
+        fullText = "Treino";
+      }
+
+      // Turno curto (ex: 19h ou 07h)
+      const turnoTag = st.turno === "NOTURNO" ? "19h" : (st.turno === "DIURNO" ? "07h" : "ADM");
+
+      gridHtml += `
+        <div class="calendar-day-card ${isToday ? 'is-today' : ''} ${isSelected ? 'is-selected' : ''}" data-day="${d}">
+          <div class="day-header">
+            <span class="day-num">${d}</span>
+            ${isToday ? `<span class="today-chip">HOJE</span>` : ""}
+          </div>
+          <div class="day-status-box ${statusBoxClass}">
+            <span class="status-text-short">${shortText} <span style="font-size:0.55rem;opacity:0.8;">${st.status === 'T' ? turnoTag : ''}</span></span>
+            <span class="status-text-full">${fullText} ${st.status === 'T' ? `(${turnoTag})` : ''}</span>
+          </div>
+          ${st.status === 'T' && meuCaminhao ? `<div class="day-truck-chip">🚛 C${meuCaminhao.numero}</div>` : ''}
+        </div>
+      `;
+    }
+
+    // 3. Dias residuais do próximo mês para completar grid de 7
+    const totalCells = firstDayIndex + daysInMonth;
+    const nextDaysCount = (7 - (totalCells % 7)) % 7;
+    for (let j = 1; j <= nextDaysCount; j++) {
+      gridHtml += `
+        <div class="calendar-day-card is-other-month">
+          <div class="day-header">
+            <span class="day-num" style="color:var(--text-dim);">${j}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    calendarDaysGrid.innerHTML = gridHtml;
+
+    // Adiciona listener de clique em cada dia
+    const dayCards = calendarDaysGrid.querySelectorAll(".calendar-day-card:not(.is-other-month)");
+    dayCards.forEach(card => {
+      card.addEventListener("click", () => {
+        const day = parseInt(card.getAttribute("data-day"), 10);
+        state.selectedCalendarDay = day;
+        dayCards.forEach(c => c.classList.remove("is-selected"));
+        card.classList.add("is-selected");
+        renderSelectedDayDetails(colab, year, month, day);
+      });
+    });
+
+    // Renderiza painel de detalhes do dia selecionado
+    renderSelectedDayDetails(colab, year, month, state.selectedCalendarDay || 1);
+  }
+
+  function renderCalendarMonthStats(colab, year, month) {
+    if (!calendarMonthStats) return;
+
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    let workDays = 0;
+    let offDays = 0;
+    let nextOffDay = null;
+
+    const today = new Date();
+    const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
+    const todayDay = today.getDate();
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateIso = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+      const st = StorageService.calcularStatusDia(colab.id, dateIso);
+      if (st.status === "T") {
+        workDays++;
+      } else if (st.status === "F") {
+        offDays++;
+        if (isCurrentMonth && d >= todayDay && !nextOffDay) {
+          nextOffDay = d;
+        }
+      }
+    }
+
+    const trucks = StorageService.getCaminhoes();
+    const meuCaminhao = trucks.find(t => t.motoristaId === colab.id || t.ajudanteId === colab.id);
+    const truckStr = meuCaminhao ? `CAM ${meuCaminhao.numero}` : "Reserva / ADM";
+
+    let folgaTexto = "Programada";
+    if (isCurrentMonth) {
+      if (nextOffDay === todayDay) {
+        folgaTexto = "Hoje!";
+      } else if (nextOffDay) {
+        const diff = nextOffDay - todayDay;
+        folgaTexto = `Dia ${nextOffDay} (${diff}d)`;
+      } else {
+        folgaTexto = "Fim do ciclo";
+      }
+    } else {
+      folgaTexto = `${offDays} dias`;
+    }
+
+    calendarMonthStats.innerHTML = `
+      <div class="calendar-stat-pill">
+        <span class="num" style="color:var(--emerald-neon);">${workDays}</span>
+        <span class="label">Dias de Trabalho</span>
+      </div>
+      <div class="calendar-stat-pill">
+        <span class="num" style="color:var(--text-muted);">${offDays}</span>
+        <span class="label">Dias de Folga</span>
+      </div>
+      <div class="calendar-stat-pill">
+        <span class="num" style="color:var(--cyan-neon);">${folgaTexto}</span>
+        <span class="label">Próxima Folga</span>
+      </div>
+      <div class="calendar-stat-pill">
+        <span class="num" style="color:var(--amber-neon);">${truckStr}</span>
+        <span class="label">Caminhão</span>
+      </div>
+    `;
+  }
+
+  function renderSelectedDayDetails(colab, year, month, day) {
+    if (!calendarDayDetails) return;
+
+    const date = new Date(year, month, day);
+    const dateIso = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    const st = StorageService.calcularStatusDia(colab.id, dateIso);
+
+    const dateFormatted = date.toLocaleDateString("pt-BR", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    });
+
+    const isSalobo = colab.area === "salobo";
+    const areaName = isSalobo ? "Área Salobo (4 Caminhões)" : "Área Sossego (3 Caminhões)";
+
+    // Caminhão e dupla
+    const trucks = StorageService.getCaminhoes();
+    const meuCaminhao = trucks.find(t => t.motoristaId === colab.id || t.ajudanteId === colab.id);
+
+    let infoVeiculo = "Apoio / Reserva Técnica";
+    let infoDupla = "Disponível na Base";
+    if (meuCaminhao) {
+      infoVeiculo = `Caminhão ${meuCaminhao.numero} (${meuCaminhao.placa || 'Sem Placa'} • ${meuCaminhao.modelo || 'Traçado'})`;
+      if (meuCaminhao.motoristaId === colab.id) {
+        const ajudante = meuCaminhao.ajudanteId ? StorageService.getColaboradorById(meuCaminhao.ajudanteId) : null;
+        infoDupla = ajudante ? `${ajudante.nome} (Ajudante)` : "Aguardando ajudante";
+      } else {
+        const motorista = meuCaminhao.motoristaId ? StorageService.getColaboradorById(meuCaminhao.motoristaId) : null;
+        infoDupla = motorista ? `${motorista.nome} (Motorista)` : "Aguardando motorista";
+      }
+    }
+
+    let statusPillHtml = "";
+    if (st.status === "T") {
+      statusPillHtml = `<span class="badge badge-emerald" style="font-size:0.85rem; padding:4px 10px;">● TRABALHO • ${st.turno} (${st.turno === 'NOTURNO' ? '19h às 07h' : '07h às 19h'})</span>`;
+    } else if (st.status === "F") {
+      statusPillHtml = `<span class="badge badge-purple" style="font-size:0.85rem; padding:4px 10px;">○ FOLGA DE REVEZAMENTO (3x3)</span>`;
+    } else if (st.status === "FE") {
+      statusPillHtml = `<span class="badge badge-purple" style="font-size:0.85rem; padding:4px 10px;">🟣 EM FÉRIAS</span>`;
+    } else if (st.status === "AT") {
+      statusPillHtml = `<span class="badge badge-amber" style="font-size:0.85rem; padding:4px 10px;">🟡 ATESTADO MÉDICO</span>`;
+    } else {
+      statusPillHtml = `<span class="badge badge-cyan" style="font-size:0.85rem; padding:4px 10px;">🔵 ${st.detalhe || 'TREINAMENTO'}</span>`;
+    }
+
+    calendarDayDetails.innerHTML = `
+      <div style="flex: 1; min-width: 240px;">
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px;">
+          <span style="font-size: 1.05rem; font-weight: 800; color: var(--text-main); text-transform: capitalize;">
+            📅 ${dateFormatted}
+          </span>
+          ${statusPillHtml}
+        </div>
+        <div style="font-size: 0.85rem; color: var(--text-muted);">
+          Colaborador: <strong style="color:var(--text-main);">${colab.nome}</strong> (${colab.cargo}) • ${areaName} • Turma ${colab.turma3x3 || 'A'}
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center;">
+        <div style="font-size: 0.82rem; line-height: 1.4;">
+          <div>🚛 <strong>Veículo:</strong> ${infoVeiculo}</div>
+          <div>👥 <strong>Dupla:</strong> ${infoDupla}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ==========================================================================
   // MINHA ESCALA: CONSULTA PESSOAL & FIXAÇÃO LOCAL NO CELULAR (MOBILE-FIRST)
   // ==========================================================================
   function renderPersonalSchedule() {
@@ -438,9 +759,12 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
         localStorage.setItem("escala_meu_colaborador_id", id);
+        state.selectedCalendarColabId = id;
         const savedColab = StorageService.getColaboradorById(id);
         showToast(`Perfil fixado: ${savedColab ? savedColab.nome : 'Colaborador'}!`, "success");
         renderPersonalSchedule();
+        populateCalendarColabSelect();
+        renderCalendarGrid();
         renderScheduleTable();
       }
 
@@ -645,6 +969,8 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.removeItem("escala_meu_colaborador_id");
         showToast("Seleção de colaborador desfeita. Escolha outro nome.", "info");
         renderPersonalSchedule();
+        populateCalendarColabSelect();
+        renderCalendarGrid();
         renderScheduleTable();
       });
     }
@@ -657,10 +983,58 @@ document.addEventListener("DOMContentLoaded", () => {
     renderStats(data);
     renderTrucks();
     renderTodayRoster();
+    populateCalendarColabSelect();
+    renderCalendarGrid();
     renderScheduleTable();
   }
 
   // 8. EVENT LISTENERS & FILTROS
+
+  // Alternador de Visualização: Formato Calendário vs Tabela Geral
+  if (btnViewCalendar) {
+    btnViewCalendar.addEventListener("click", () => {
+      state.calendarMode = "calendar";
+      btnViewCalendar.classList.add("active");
+      if (btnViewTable) btnViewTable.classList.remove("active");
+      if (calendarGridContainer) calendarGridContainer.style.display = "block";
+      if (calendarTableContainer) calendarTableContainer.style.display = "none";
+      renderCalendarGrid();
+    });
+  }
+
+  if (btnViewTable) {
+    btnViewTable.addEventListener("click", () => {
+      state.calendarMode = "table";
+      btnViewTable.classList.add("active");
+      if (btnViewCalendar) btnViewCalendar.classList.remove("active");
+      if (calendarGridContainer) calendarGridContainer.style.display = "none";
+      if (calendarTableContainer) calendarTableContainer.style.display = "block";
+      renderScheduleTable();
+    });
+  }
+
+  // Seletor de Colaborador no Calendário Mensal
+  if (calendarColabSelect) {
+    calendarColabSelect.addEventListener("change", (e) => {
+      state.selectedCalendarColabId = e.target.value;
+      renderCalendarGrid();
+    });
+  }
+
+  // Botão "Ver Meu Perfil Salvo" no Calendário
+  if (btnUseMyProfileCalendar) {
+    btnUseMyProfileCalendar.addEventListener("click", () => {
+      const savedId = localStorage.getItem("escala_meu_colaborador_id");
+      if (savedId) {
+        state.selectedCalendarColabId = savedId;
+        if (calendarColabSelect) calendarColabSelect.value = savedId;
+        renderCalendarGrid();
+        showToast("Visualizando sua escala pessoal no calendário!", "success");
+      } else {
+        showToast("Nenhum colaborador foi salvo ainda neste celular.", "warning");
+      }
+    });
+  }
 
   // Abas de Área (Todas, Sossego, Salobo)
   areaTabs.forEach((tab) => {
@@ -681,7 +1055,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Navegação de Meses
+  // Navegação de Meses (Atualiza tanto o Calendário quanto a Tabela)
   if (prevMonthBtn) {
     prevMonthBtn.addEventListener("click", () => {
       state.currentMonth--;
@@ -689,6 +1063,7 @@ document.addEventListener("DOMContentLoaded", () => {
         state.currentMonth = 11;
         state.currentYear--;
       }
+      renderCalendarGrid();
       renderScheduleTable();
     });
   }
@@ -700,6 +1075,7 @@ document.addEventListener("DOMContentLoaded", () => {
         state.currentMonth = 0;
         state.currentYear++;
       }
+      renderCalendarGrid();
       renderScheduleTable();
     });
   }
@@ -709,6 +1085,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const now = new Date();
       state.currentYear = now.getFullYear();
       state.currentMonth = now.getMonth();
+      state.selectedCalendarDay = now.getDate();
+      renderCalendarGrid();
       renderScheduleTable();
     });
   }

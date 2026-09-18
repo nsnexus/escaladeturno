@@ -7,8 +7,8 @@
   <meta name="description" content="Sistema corporativo de gestão e monitoramento de escalas de turno para as frotas e efetivo de Sossego e Salobo.">
   
   <!-- CSS Design System -->
-  <link rel="stylesheet" href="css/style.css?v=2.2">
-  <link rel="stylesheet" href="css/print.css?v=2.2" media="print">
+  <link rel="stylesheet" href="css/style.css?v=2.3">
+  <link rel="stylesheet" href="css/print.css?v=2.3" media="print">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -192,13 +192,23 @@
     </section>
 
     <!-- ==================== GRADE MENSAL DE ESCALA ==================== -->
-    <section class="schedule-calendar-section">
+    <section class="schedule-calendar-section" id="scheduleCalendarSection">
       <div class="calendar-top-controls">
         <div class="calendar-month-selector">
           <button class="btn btn-glass" id="prevMonthBtn">‹ Mês Anterior</button>
           <span class="current-month-display" id="currentMonthDisplay">Setembro 2026</span>
           <button class="btn btn-glass" id="nextMonthBtn">Próximo Mês ›</button>
           <button class="btn btn-glass" id="currentMonthBtn">Mês Atual</button>
+        </div>
+
+        <!-- Alternador entre Calendário Mensal e Tabela Geral -->
+        <div class="calendar-view-switcher">
+          <button class="view-switch-btn active" id="btnViewCalendar" title="Visualização em Formato de Calendário Mensal (Perfeito para Celular)">
+            📅 Formato Calendário
+          </button>
+          <button class="view-switch-btn" id="btnViewTable" title="Visualização em Tabela Geral de todos os 36 colaboradores">
+            📊 Tabela Geral
+          </button>
         </div>
 
         <div class="calendar-legend">
@@ -225,15 +235,68 @@
         </div>
       </div>
 
-      <div class="table-responsive-wrapper">
-        <table class="schedule-table" id="scheduleTable">
-          <thead id="scheduleTableHead">
-            <!-- Renderizado dinamicamente -->
-          </thead>
-          <tbody id="scheduleTableBody">
-            <!-- Renderizado dinamicamente -->
-          </tbody>
-        </table>
+      <!-- ==================== VISÃO 1: FORMATO DE CALENDÁRIO MENSAL (MOBILE FIRST) ==================== -->
+      <div id="calendarGridContainer">
+        
+        <!-- Barra de Seleção de Colaborador -->
+        <div class="calendar-colab-picker-bar">
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex: 1;">
+            <label for="calendarColabSelect" style="font-size: 0.85rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 6px;">
+              <span>👤</span> Escala do Colaborador:
+            </label>
+            <select id="calendarColabSelect" class="calendar-colab-select">
+              <!-- Opções renderizadas dinamicamente pelo app.js -->
+            </select>
+          </div>
+
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-glass" id="btnUseMyProfileCalendar" title="Carregar meu colaborador fixado neste aparelho">
+              ⭐ Ver Meu Perfil
+            </button>
+          </div>
+        </div>
+
+        <!-- Resumo / Indicadores do Mês do Colaborador -->
+        <div class="calendar-month-stats" id="calendarMonthStats">
+          <!-- Renderizado dinamicamente pelo app.js -->
+        </div>
+
+        <!-- Grade de Dias do Mês (7 Colunas - Domingo a Sábado) -->
+        <div class="calendar-grid-wrapper">
+          <div class="calendar-weekdays-row">
+            <div class="calendar-weekday-cell" style="color: var(--coral-neon);">DOM</div>
+            <div class="calendar-weekday-cell">SEG</div>
+            <div class="calendar-weekday-cell">TER</div>
+            <div class="calendar-weekday-cell">QUA</div>
+            <div class="calendar-weekday-cell">QUI</div>
+            <div class="calendar-weekday-cell">SEX</div>
+            <div class="calendar-weekday-cell" style="color: var(--cyan-neon);">SÁB</div>
+          </div>
+
+          <div class="calendar-days-grid" id="calendarDaysGrid">
+            <!-- Células dos dias renderizadas dinamicamente pelo app.js -->
+          </div>
+        </div>
+
+        <!-- Painel de Detalhes do Dia Selecionado -->
+        <div class="selected-day-details-panel" id="calendarDayDetails">
+          <!-- Renderizado dinamicamente pelo app.js -->
+        </div>
+
+      </div>
+
+      <!-- ==================== VISÃO 2: TABELA GERAL (36 COLABORADORES) ==================== -->
+      <div id="calendarTableContainer" style="display: none;">
+        <div class="table-responsive-wrapper">
+          <table class="schedule-table" id="scheduleTable">
+            <thead id="scheduleTableHead">
+              <!-- Renderizado dinamicamente -->
+            </thead>
+            <tbody id="scheduleTableBody">
+              <!-- Renderizado dinamicamente -->
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
 
@@ -304,9 +367,9 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
   <!-- Scripts da Aplicação -->
-  <script src="js/data-initial.js?v=2.2"></script>
-  <script src="js/firebase-config.js?v=2.2"></script>
-  <script src="js/storage.js?v=2.2"></script>
-  <script src="js/app.js?v=2.2"></script>
+  <script src="js/data-initial.js?v=2.3"></script>
+  <script src="js/firebase-config.js?v=2.3"></script>
+  <script src="js/storage.js?v=2.3"></script>
+  <script src="js/app.js?v=2.3"></script>
 </body>
 </html>

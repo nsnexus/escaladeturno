@@ -83,6 +83,43 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const areaName = colab.area === "sossego" ? "Sossego (3 Caminhões)" : "Salobo (4 Caminhões)";
 
+    // Próximos 14 dias em formato de calendário
+    const weekDaysNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+    let calStripHtml = "";
+    for (let i = 0; i < 14; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() + i);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      const dIso = `${year}-${month}-${day}`;
+      const stDia = StorageService.calcularStatusDia(colab.id, dIso);
+      const isToday = i === 0;
+
+      let tagClass = "status-f";
+      let tagText = "Folga";
+      if (stDia.status === "T") {
+        tagClass = "status-t";
+        tagText = "Trabalho";
+      } else if (stDia.status === "FE") {
+        tagClass = "status-fe";
+        tagText = "Férias";
+      } else if (stDia.status === "AT") {
+        tagClass = "status-at";
+        tagText = "Atestado";
+      }
+
+      calStripHtml += `
+        <div class="calendar-day-card ${isToday ? 'is-today' : ''}" style="min-height:56px; padding:4px 2px; text-align:center;">
+          <div style="font-size:0.65rem; color:var(--text-dim);">${isToday ? 'Hoje' : weekDaysNames[d.getDay()]}</div>
+          <div style="font-size:0.85rem; font-weight:800; color:var(--text-main); margin:1px 0;">${day}</div>
+          <div class="day-status-box ${tagClass}" style="padding:2px 1px; font-size:0.58rem;">
+            ${tagText}
+          </div>
+        </div>
+      `;
+    }
+
     resultBox.innerHTML = `
       <div style="display:flex; align-items:flex-start; gap:16px;">
         <div style="width:52px; height:52px; border-radius:50%; background:var(--grad-cyan); color:#080c14; font-weight:800; font-size:1.15rem; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
@@ -120,6 +157,14 @@ document.addEventListener("DOMContentLoaded", () => {
               <div style="font-size:0.88rem; font-weight:600; color:var(--text-main);">
                 ${camAlocado ? `Caminhão ${camAlocado.numero}` : "Apoio Geral / ADM"}
               </div>
+            </div>
+          </div>
+          <div style="margin-top: 14px;">
+            <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">
+              📅 Calendário da Escala (Próximos 14 Dias)
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(46px, 1fr)); gap: 4px; overflow-x: auto;">
+              ${calStripHtml}
             </div>
           </div>
         </div>
