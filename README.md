@@ -35,18 +35,26 @@ Sistema moderno, corporativo e de alta performance para gestão e exibição pú
 
 ```
 escala de turno/
-├── index.html              # Tela de Apresentação / Display TV
+├── index.html              # Página Inicial de Apresentação (Landing Page)
+├── escala.html             # Tela Operacional / Display TV e Telão de Escalas
 ├── admin.html              # Painel Administrativo de Gestão
+├── landing.html            # Redirecionamento automático para index.html
 ├── css/
-│   ├── style.css           # Design System principal (Dark Industrial, Neon, Glassmorphism)
+│   ├── style.css           # Design System HC Ambiental (Tema Claro, Verde & Azul)
+│   ├── landing.css         # Estilos exclusivos da Landing Page
 │   ├── admin.css           # Estilos dedicados do Painel Administrativo
 │   └── print.css           # Estilos otimizados para impressão/PDF de murais
 ├── js/
 │   ├── data-initial.js     # 36 colaboradores e frotas originais de Sossego e Salobo
 │   ├── firebase-config.js  # Gerenciador de conexão Firebase Firestore
 │   ├── storage.js          # Camada DAL unificada (LocalStorage + Firestore Realtime)
-│   ├── app.js              # Controlador da Tela de Apresentação
+│   ├── app.js              # Controlador da Tela de Escala
+│   ├── landing.js          # Controlador de busca rápida e perfil da Landing Page
 │   └── admin.js            # Controlador do Painel Administrativo
+├── img/
+│   ├── logo-hc-ambiental.png # Logotipo oficial HC Ambiental
+│   ├── team-operations.jpg   # Foto da equipe operacional HC Ambiental
+│   └── hero-control.jpg      # Foto da sala de controle operacional
 ├── _headers                # Cabeçalhos de segurança e cache para o Cloudflare Pages
 ├── .gitignore              # Arquivos ignorados pelo Git
 └── README.md               # Documentação técnica e de deploy
