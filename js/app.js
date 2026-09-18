@@ -15,8 +15,19 @@ document.addEventListener("DOMContentLoaded", () => {
     tvStep: 0,
     calendarMode: "calendar", // "calendar" (padrao mobile) ou "table"
     selectedCalendarColabId: localStorage.getItem("escala_meu_colaborador_id") || null,
-    selectedCalendarDay: new Date().getDate()
+    selectedCalendarDay: new Date().getDate(),
+    adminViewMode: StorageService.getUsuarioLogado() ? "full" : "individual",
+    pickerQuickArea: "todas"
   };
+
+  // Função utilitária para normalizar strings (busca inteligente sem acentos)
+  function normalizeText(text) {
+    return (text || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .trim();
+  }
 
   // Elementos do DOM
   const clockDigitsEl = document.getElementById("clockDigits");
@@ -51,6 +62,58 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Status de Nuvem
   const cloudStatusBadge = document.getElementById("cloudStatusBadge");
+
+  // Elementos de Sessão de Liderança / Admin
+  const btnAdminTrigger = document.getElementById("btnAdminTrigger");
+  const txtAdminTrigger = document.getElementById("txtAdminTrigger");
+  const iconAdminTrigger = document.getElementById("iconAdminTrigger");
+  const adminSessionBar = document.getElementById("adminSessionBar");
+  const adminSessionEmail = document.getElementById("adminSessionEmail");
+  const btnAdminViewIndividual = document.getElementById("btnAdminViewIndividual");
+  const btnAdminViewFull = document.getElementById("btnAdminViewFull");
+  const btnAdminLogout = document.getElementById("btnAdminLogout");
+  const viewUsuarioComum = document.getElementById("viewUsuarioComum");
+  const viewControleCompletoAdmin = document.getElementById("viewControleCompletoAdmin");
+  const calendarViewSwitcher = document.getElementById("calendarViewSwitcher");
+  const calendarColabPickerBar = document.getElementById("calendarColabPickerBar");
+
+  // Alternador de Visão de Permissão (Usuário Comum vs Administrador / Liderança)
+  function updateAdminUIMode() {
+    const adminUser = StorageService.getUsuarioLogado();
+
+    if (adminUser) {
+      if (adminSessionBar) adminSessionBar.style.display = "flex";
+      if (adminSessionEmail) adminSessionEmail.textContent = adminUser.email;
+      if (txtAdminTrigger) txtAdminTrigger.textContent = "Painel Admin";
+      if (iconAdminTrigger) {
+        iconAdminTrigger.className = "fa-solid fa-sliders";
+      }
+
+      if (state.adminViewMode === "full") {
+        if (viewControleCompletoAdmin) viewControleCompletoAdmin.style.display = "block";
+        if (calendarViewSwitcher) calendarViewSwitcher.style.display = "flex";
+        if (calendarColabPickerBar) calendarColabPickerBar.style.display = "flex";
+        if (btnAdminViewFull) btnAdminViewFull.classList.add("active");
+        if (btnAdminViewIndividual) btnAdminViewIndividual.classList.remove("active");
+      } else {
+        if (viewControleCompletoAdmin) viewControleCompletoAdmin.style.display = "none";
+        if (calendarViewSwitcher) calendarViewSwitcher.style.display = "none";
+        if (calendarColabPickerBar) calendarColabPickerBar.style.display = "none";
+        if (btnAdminViewIndividual) btnAdminViewIndividual.classList.add("active");
+        if (btnAdminViewFull) btnAdminViewFull.classList.remove("active");
+      }
+    } else {
+      // Usuário comum sem login de gestor
+      if (adminSessionBar) adminSessionBar.style.display = "none";
+      if (viewControleCompletoAdmin) viewControleCompletoAdmin.style.display = "none";
+      if (calendarViewSwitcher) calendarViewSwitcher.style.display = "none";
+      if (calendarColabPickerBar) calendarColabPickerBar.style.display = "none";
+      if (txtAdminTrigger) txtAdminTrigger.textContent = "Liderança / Admin";
+      if (iconAdminTrigger) {
+        iconAdminTrigger.className = "fa-solid fa-lock";
+      }
+    }
+  }
 
   // 1. INICIALIZAÇÃO DO RELÓGIO OPERACIONAL
   function updateClock() {
@@ -409,12 +472,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const sossegoColabs = allColabs.filter(c => c.area === "sossego").sort((a, b) => a.nome.localeCompare(b.nome));
     const saloboColabs = allColabs.filter(c => c.area === "salobo").sort((a, b) => a.nome.localeCompare(b.nome));
 
-    // Determinar colaborador padrão: salvo no celular ou primeiro de Sossego
+    // Determinar colaborador padrão: salvo no celular ou primeiro se for gestor
     const savedId = localStorage.getItem("escala_meu_colaborador_id");
     if (savedId && allColabs.some(c => c.id === savedId)) {
       state.selectedCalendarColabId = savedId;
     } else if (!state.selectedCalendarColabId && allColabs.length > 0) {
-      state.selectedCalendarColabId = allColabs[0].id;
+      const admin = StorageService.getUsuarioLogado();
+      if (admin && state.adminViewMode === "full") {
+        state.selectedCalendarColabId = allColabs[0].id;
+      }
     }
 
     let optionsHtml = "";
@@ -441,11 +507,30 @@ document.addEventListener("DOMContentLoaded", () => {
     const allColabs = StorageService.getColaboradores("todas");
     if (!allColabs.length) return;
 
-    // Se o colaborador selecionado não existir, pega o primeiro
+    // Se o colaborador selecionado não existir, verifica se é gestor ou convida a selecionar
     let colab = allColabs.find(c => c.id === state.selectedCalendarColabId);
     if (!colab) {
-      colab = allColabs[0];
-      state.selectedCalendarColabId = colab.id;
+      const admin = StorageService.getUsuarioLogado();
+      if (admin && state.adminViewMode === "full") {
+        colab = allColabs[0];
+        state.selectedCalendarColabId = colab.id;
+      } else {
+        // Usuário comum ainda não selecionou seu perfil
+        calendarDaysGrid.innerHTML = `
+          <div style="grid-column: 1/-1; padding: 48px 20px; text-align: center; color: var(--text-muted); background: #ffffff; border-radius: var(--radius-md); border: 1px dashed var(--border-subtle);">
+            <div style="font-size: 2rem; color: var(--hc-green); margin-bottom: 10px;">
+              <i class="fa-solid fa-arrow-up"></i>
+            </div>
+            <h3 style="font-size: 1.05rem; color: var(--text-main); font-weight: 700; margin-bottom: 6px;">Selecione seu nome acima</h3>
+            <p style="font-size: 0.85rem; max-width: 440px; margin: 0 auto; line-height: 1.5;">
+              Para consultar sua escala mensal completa com todos os dias de turno e folga, pesquise e clique no seu perfil acima.
+            </p>
+          </div>
+        `;
+        if (calendarMonthStats) calendarMonthStats.innerHTML = "";
+        if (calendarDayDetails) calendarDayDetails.innerHTML = "";
+        return;
+      }
     }
 
     const year = state.currentYear;
@@ -715,76 +800,255 @@ document.addEventListener("DOMContentLoaded", () => {
     const savedId = localStorage.getItem("escala_meu_colaborador_id");
     const allColabs = StorageService.getColaboradores("todas");
 
-    // Cenário 1: Nenhum colaborador selecionado ainda neste dispositivo
+    // ========================================================================
+    // CENÁRIO 1: NENHUM COLABORADOR SELECIONADO (CAMPO DE BUSCA COM DIGITAÇÃO)
+    // ========================================================================
     if (!savedId) {
-      const sossegoColabs = allColabs.filter(c => c.area === "sossego").sort((a, b) => a.nome.localeCompare(b.nome));
-      const saloboColabs = allColabs.filter(c => c.area === "salobo").sort((a, b) => a.nome.localeCompare(b.nome));
+      const sossegoCount = allColabs.filter(c => c.area === "sossego").length;
+      const saloboCount = allColabs.filter(c => c.area === "salobo").length;
 
       heroEl.innerHTML = `
-        <div class="personal-picker-row">
-          <div style="flex: 1; min-width: 260px;">
+        <div class="personal-picker-row" style="flex-direction: column; align-items: stretch; gap: 16px;">
+          <div>
             <div class="personal-hero-title">
-              <span style="font-size: 1.3rem;">📱</span>
-              <span>Minha Escala no Celular</span>
-              <span class="personal-badge-tag">Consulta Rápida</span>
+              <i class="fa-solid fa-user-tag" style="color: var(--hc-green); font-size: 1.25rem;"></i>
+              <span>Minha Escala Individual</span>
+              <span class="personal-badge-tag"><i class="fa-solid fa-mobile-screen"></i> Consulta Rápida</span>
             </div>
-            <p style="font-size: 0.84rem; color: var(--text-muted); margin-top: 4px;">
-              Selecione seu nome abaixo. O sistema manterá seus dados salvos neste aparelho para você ver seu turno e caminhão direto!
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; line-height: 1.4;">
+              Digite seu nome ou matrícula abaixo para ver seus dias de trabalho, caminhão, parceiro e folgas:
             </p>
           </div>
 
-          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; width: 100%; max-width: 580px;">
-            <select id="selectMyColaborador" class="personal-select">
-              <option value="">-- Selecione seu nome na lista (36 colaboradores) --</option>
-              <optgroup label="Área Sossego (3 Caminhões)">
-                ${sossegoColabs.map(c => `<option value="${c.id}">${c.nome} • ${c.cargo} (Turma ${c.turma3x3 || 'A'})</option>`).join("")}
-              </optgroup>
-              <optgroup label="Área Salobo (4 Caminhões)">
-                ${saloboColabs.map(c => `<option value="${c.id}">${c.nome} • ${c.cargo} (Turma ${c.turma3x3 || 'A'})</option>`).join("")}
-              </optgroup>
-            </select>
-            <button id="btnSalvarMeuPerfil" class="btn btn-cyan" style="white-space: nowrap;">
-              ✓ Salvar Meu Perfil
-            </button>
+          <!-- Campo de Busca com Digitação e Autocomplete em Tempo Real -->
+          <div class="colab-search-container">
+            <div class="colab-search-input-wrap">
+              <i class="fa-solid fa-magnifying-glass search-icon"></i>
+              <input 
+                type="text" 
+                id="inputBuscaColab" 
+                class="colab-search-input" 
+                placeholder="Digite seu nome (ex: João, Carlos, Narciso...) ou matrícula..." 
+                autocomplete="off"
+              />
+              <button type="button" id="btnClearColabSearch" class="colab-search-clear" title="Limpar pesquisa">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+            <!-- Lista suspensa de sugestões em tempo real -->
+            <div id="colabSuggestionsList" class="colab-suggestions-list"></div>
+          </div>
+
+          <!-- Toque Rápido com Abas de Área -->
+          <div class="colab-quick-container">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+              <span style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">
+                <i class="fa-solid fa-hand-pointer"></i> Ou selecione diretamente na lista:
+              </span>
+              <div class="colab-quick-filter-tabs" id="quickAreaTabs">
+                <button type="button" class="colab-quick-tab ${state.pickerQuickArea === 'todas' ? 'active' : ''}" data-area="todas">Todas (${allColabs.length})</button>
+                <button type="button" class="colab-quick-tab ${state.pickerQuickArea === 'sossego' ? 'active' : ''}" data-area="sossego">Sossego (${sossegoCount})</button>
+                <button type="button" class="colab-quick-tab ${state.pickerQuickArea === 'salobo' ? 'active' : ''}" data-area="salobo">Salobo (${saloboCount})</button>
+              </div>
+            </div>
+            <div id="colabQuickGrid" class="colab-quick-grid"></div>
           </div>
         </div>
       `;
 
-      const selectEl = document.getElementById("selectMyColaborador");
-      const btnSaveEl = document.getElementById("btnSalvarMeuPerfil");
+      const inputBusca = document.getElementById("inputBuscaColab");
+      const btnClear = document.getElementById("btnClearColabSearch");
+      const suggestionsList = document.getElementById("colabSuggestionsList");
+      const quickGrid = document.getElementById("colabQuickGrid");
+      const quickAreaTabs = document.querySelectorAll("#quickAreaTabs .colab-quick-tab");
 
       function saveProfile(id) {
-        if (!id) {
-          showToast("Selecione seu nome na lista para salvar.", "warning");
-          return;
-        }
+        if (!id) return;
         localStorage.setItem("escala_meu_colaborador_id", id);
         state.selectedCalendarColabId = id;
         const savedColab = StorageService.getColaboradorById(id);
-        showToast(`Perfil fixado: ${savedColab ? savedColab.nome : 'Colaborador'}!`, "success");
+        showToast(`Olá, ${savedColab ? savedColab.nome : 'Colaborador'}! Sua escala foi carregada.`, "success");
         renderPersonalSchedule();
         populateCalendarColabSelect();
         renderCalendarGrid();
         renderScheduleTable();
       }
 
-      if (btnSaveEl) {
-        btnSaveEl.addEventListener("click", () => {
-          saveProfile(selectEl ? selectEl.value : "");
+      function getFilteredList(query, area) {
+        const normQ = normalizeText(query);
+        return allColabs.filter(c => {
+          const matchArea = area === "todas" || c.area === area;
+          if (!matchArea) return false;
+          if (!normQ) return true;
+          const matchNome = normalizeText(c.nome).includes(normQ);
+          const matchCargo = normalizeText(c.cargo).includes(normQ);
+          const matchMatricula = normalizeText(c.matricula).includes(normQ);
+          return matchNome || matchCargo || matchMatricula;
+        }).sort((a, b) => a.nome.localeCompare(b.nome));
+      }
+
+      function renderQuickGrid() {
+        if (!quickGrid) return;
+        const currentQuery = inputBusca ? inputBusca.value : "";
+        const list = getFilteredList(currentQuery, state.pickerQuickArea);
+
+        if (list.length === 0) {
+          quickGrid.innerHTML = `
+            <div style="grid-column: 1/-1; padding: 24px; text-align: center; color: var(--text-muted); font-size: 0.88rem;">
+              <i class="fa-solid fa-magnifying-glass" style="margin-bottom: 6px; display: block; font-size: 1.2rem; opacity: 0.6;"></i>
+              Nenhum colaborador encontrado com "${currentQuery}".
+            </div>
+          `;
+          return;
+        }
+
+        quickGrid.innerHTML = list.map(c => {
+          const isSalobo = c.area === "salobo";
+          return `
+            <div class="colab-quick-card" data-colab-id="${c.id}">
+              <div class="colab-quick-info">
+                <div class="colab-quick-name">${c.nome}</div>
+                <div class="colab-quick-meta">
+                  <span>${c.cargo}</span>
+                  <span>•</span>
+                  <span style="color: ${isSalobo ? 'var(--hc-green-dark)' : '#0369a1'}; font-weight: 700;">
+                    ${isSalobo ? 'Salobo' : 'Sossego'}
+                  </span>
+                  <span>•</span>
+                  <span>Turma ${c.turma3x3 || 'A'}</span>
+                </div>
+              </div>
+              <i class="fa-solid fa-chevron-right colab-quick-arrow"></i>
+            </div>
+          `;
+        }).join("");
+
+        quickGrid.querySelectorAll(".colab-quick-card").forEach(card => {
+          card.addEventListener("click", () => {
+            const id = card.getAttribute("data-colab-id");
+            saveProfile(id);
+          });
         });
       }
 
-      if (selectEl) {
-        selectEl.addEventListener("change", (e) => {
-          if (e.target.value) {
-            saveProfile(e.target.value);
+      function updateSuggestions(query) {
+        if (!suggestionsList) return;
+        const normQ = normalizeText(query);
+        if (!normQ) {
+          suggestionsList.classList.remove("open");
+          suggestionsList.innerHTML = "";
+          return;
+        }
+
+        const matches = allColabs.filter(c => {
+          return normalizeText(c.nome).includes(normQ) ||
+                 normalizeText(c.cargo).includes(normQ) ||
+                 normalizeText(c.matricula).includes(normQ);
+        }).slice(0, 8);
+
+        if (matches.length === 0) {
+          suggestionsList.innerHTML = `
+            <div style="padding: 12px 14px; color: var(--text-muted); font-size: 0.84rem;">
+              Nenhum colaborador encontrado com este nome.
+            </div>
+          `;
+          suggestionsList.classList.add("open");
+          return;
+        }
+
+        suggestionsList.innerHTML = matches.map(c => {
+          const isSalobo = c.area === "salobo";
+          return `
+            <div class="colab-suggestion-item" data-colab-id="${c.id}">
+              <div>
+                <div class="colab-suggestion-name">${c.nome}</div>
+                <div class="colab-suggestion-meta">${c.cargo} • Matrícula: ${c.matricula || 'N/D'}</div>
+              </div>
+              <div class="colab-suggestion-badges">
+                <span class="personal-badge-tag" style="background: ${isSalobo ? 'rgba(0, 166, 81, 0.12)' : 'rgba(14, 165, 233, 0.12)'}; color: ${isSalobo ? 'var(--hc-green-dark)' : '#0369a1'}; font-size: 0.68rem; padding: 2px 6px;">
+                  ${isSalobo ? 'Salobo' : 'Sossego'}
+                </span>
+                <span class="personal-badge-tag" style="font-size: 0.68rem; padding: 2px 6px;">
+                  Turma ${c.turma3x3 || 'A'}
+                </span>
+              </div>
+            </div>
+          `;
+        }).join("");
+
+        suggestionsList.classList.add("open");
+
+        suggestionsList.querySelectorAll(".colab-suggestion-item").forEach(item => {
+          item.addEventListener("click", () => {
+            const id = item.getAttribute("data-colab-id");
+            saveProfile(id);
+          });
+        });
+      }
+
+      if (inputBusca) {
+        inputBusca.addEventListener("input", (e) => {
+          const val = e.target.value;
+          if (btnClear) btnClear.style.display = val.length > 0 ? "block" : "none";
+          updateSuggestions(val);
+          renderQuickGrid();
+        });
+
+        inputBusca.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            const firstSuggestion = suggestionsList ? suggestionsList.querySelector(".colab-suggestion-item") : null;
+            if (firstSuggestion) {
+              const id = firstSuggestion.getAttribute("data-colab-id");
+              saveProfile(id);
+            } else {
+              const firstCard = quickGrid ? quickGrid.querySelector(".colab-quick-card") : null;
+              if (firstCard) {
+                const id = firstCard.getAttribute("data-colab-id");
+                saveProfile(id);
+              }
+            }
           }
         });
       }
+
+      if (btnClear) {
+        btnClear.addEventListener("click", () => {
+          if (inputBusca) {
+            inputBusca.value = "";
+            inputBusca.focus();
+          }
+          btnClear.style.display = "none";
+          if (suggestionsList) {
+            suggestionsList.classList.remove("open");
+            suggestionsList.innerHTML = "";
+          }
+          renderQuickGrid();
+        });
+      }
+
+      quickAreaTabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+          quickAreaTabs.forEach(t => t.classList.remove("active"));
+          tab.classList.add("active");
+          state.pickerQuickArea = tab.getAttribute("data-area");
+          renderQuickGrid();
+        });
+      });
+
+      // Fechar lista de sugestões ao clicar fora
+      document.addEventListener("click", (e) => {
+        if (!e.target.closest(".colab-search-container")) {
+          if (suggestionsList) suggestionsList.classList.remove("open");
+        }
+      });
+
+      renderQuickGrid();
       return;
     }
 
-    // Cenário 2: Colaborador já salvo localmente
+    // ========================================================================
+    // CENÁRIO 2: COLABORADOR CONECTADO / SALVO (EXIBIÇÃO INDIVIDUALIZADA)
+    // ========================================================================
     const colab = StorageService.getColaboradorById(savedId);
     if (!colab) {
       localStorage.removeItem("escala_meu_colaborador_id");
@@ -817,36 +1081,36 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // Status Hoje Badge
+    // Status Hoje Badge com Ícones Font Awesome
     let statusBadgeHtml = "";
     if (stHoje.status === "T") {
       statusBadgeHtml = `
         <div class="my-status-badge trabalho">
-          <span>🟢</span> TRABALHANDO HOJE
+          <i class="fa-solid fa-circle-check"></i> TRABALHANDO HOJE
         </div>
       `;
     } else if (stHoje.status === "F") {
       statusBadgeHtml = `
         <div class="my-status-badge folga">
-          <span>⚪</span> FOLGA HOJE
+          <i class="fa-solid fa-bed"></i> FOLGA HOJE
         </div>
       `;
     } else if (stHoje.status === "FE") {
       statusBadgeHtml = `
-        <div class="my-status-badge" style="background: rgba(168,85,247,0.15); color: var(--purple-neon); border: 1px solid var(--purple-neon);">
-          <span>🟣</span> EM FÉRIAS
+        <div class="my-status-badge" style="background: rgba(168,85,247,0.12); color: #7e22ce; border: 1px solid #c084fc;">
+          <i class="fa-solid fa-plane"></i> EM FÉRIAS
         </div>
       `;
     } else if (stHoje.status === "AT") {
       statusBadgeHtml = `
-        <div class="my-status-badge" style="background: rgba(245,158,11,0.15); color: var(--amber-neon); border: 1px solid var(--amber-neon);">
-          <span>🟡</span> ATESTADO MÉDICO
+        <div class="my-status-badge" style="background: rgba(245,158,11,0.12); color: #b45309; border: 1px solid #fcd34d;">
+          <i class="fa-solid fa-notes-medical"></i> ATESTADO MÉDICO
         </div>
       `;
     } else {
       statusBadgeHtml = `
-        <div class="my-status-badge" style="background: rgba(59,130,246,0.15); color: #93c5fd; border: 1px solid #3b82f6;">
-          <span>🔵</span> ${stHoje.detalhe || 'TREINAMENTO'}
+        <div class="my-status-badge" style="background: rgba(14,165,233,0.12); color: #0369a1; border: 1px solid #7dd3fc;">
+          <i class="fa-solid fa-graduation-cap"></i> ${stHoje.detalhe || 'TREINAMENTO'}
         </div>
       `;
     }
@@ -870,22 +1134,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
       let tagClass = "tag-f";
       let tagText = "Folga";
+      let tagIcon = `<i class="fa-solid fa-circle fa-2xs" style="opacity:0.6;"></i>`;
       if (stDia.status === "T") {
         tagClass = "tag-t";
         tagText = "Trabalho";
+        tagIcon = `<i class="fa-solid fa-briefcase fa-2xs"></i>`;
       } else if (stDia.status === "FE") {
         tagText = "Férias";
+        tagIcon = `<i class="fa-solid fa-plane fa-2xs"></i>`;
       } else if (stDia.status === "AT") {
         tagText = "Atestado";
+        tagIcon = `<i class="fa-solid fa-notes-medical fa-2xs"></i>`;
       } else if (stDia.status === "TR") {
         tagText = "Treino";
+        tagIcon = `<i class="fa-solid fa-graduation-cap fa-2xs"></i>`;
       }
 
       timelineCardsHtml += `
         <div class="timeline-day-card ${isToday ? 'is-today' : ''}">
           <div class="timeline-day-name">${dayName}</div>
           <div class="timeline-day-date">${dayDateStr}</div>
-          <div class="timeline-day-tag ${tagClass}">${tagText}</div>
+          <div class="timeline-day-tag ${tagClass}">${tagIcon} ${tagText}</div>
         </div>
       `;
     }
@@ -895,23 +1164,23 @@ document.addEventListener("DOMContentLoaded", () => {
     heroEl.innerHTML = `
       <div class="personal-hero-header">
         <div class="personal-hero-title">
-          <span style="font-size: 1.4rem;">👤</span>
+          <i class="fa-solid fa-circle-user" style="font-size: 1.6rem; color: var(--hc-green);"></i>
           <div>
-            <span style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Meu Perfil Salvo:</span>
+            <span style="font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Meu Perfil Conectado:</span>
             <div style="font-size: 1.25rem; font-weight: 800; color: var(--text-main);">${colab.nome}</div>
           </div>
-          <span class="personal-badge-tag">${colab.cargo}</span>
-          <span class="personal-badge-tag" style="background: ${isSalobo ? 'rgba(34, 197, 94, 0.12)' : 'rgba(56, 189, 248, 0.12)'}; color: ${isSalobo ? 'var(--emerald-neon)' : 'var(--cyan-neon)'};">
-            Área ${isSalobo ? 'Salobo' : 'Sossego'}
+          <span class="personal-badge-tag"><i class="fa-solid fa-id-card"></i> ${colab.cargo}</span>
+          <span class="personal-badge-tag" style="background: ${isSalobo ? 'rgba(0, 166, 81, 0.12)' : 'rgba(14, 165, 233, 0.12)'}; color: ${isSalobo ? 'var(--hc-green-dark)' : '#0369a1'};">
+            <i class="fa-solid fa-location-dot"></i> Área ${isSalobo ? 'Salobo' : 'Sossego'}
           </span>
-          <span class="personal-badge-tag" style="background: rgba(245, 158, 11, 0.12); color: var(--amber-neon);">
-            Turma ${colab.turma3x3 || 'A'}
+          <span class="personal-badge-tag" style="background: rgba(245, 158, 11, 0.12); color: #b45309;">
+            <i class="fa-solid fa-clock"></i> Turma ${colab.turma3x3 || 'A'}
           </span>
         </div>
 
         <div style="display: flex; gap: 8px; align-items: center;">
           <button class="btn btn-glass" id="btnTrocarColaborador" style="padding: 7px 14px; font-size: 0.82rem;" title="Mudar o colaborador fixado neste aparelho">
-            🔄 Trocar Nome
+            <i class="fa-solid fa-arrow-right-arrow-left"></i> Trocar Nome
           </button>
         </div>
       </div>
@@ -920,8 +1189,10 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="my-status-box">
           ${statusBadgeHtml}
           <div>
-            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: capitalize;">${todayDateFormatted}</div>
-            <div style="font-size: 0.95rem; font-weight: 600; color: var(--text-main); margin-top: 2px;">
+            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: capitalize;">
+              <i class="fa-regular fa-calendar"></i> ${todayDateFormatted}
+            </div>
+            <div style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin-top: 2px;">
               ${stHoje.detalhe}
             </div>
           </div>
@@ -930,30 +1201,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
       <div class="my-details-grid">
         <div class="my-detail-item">
-          <div class="label">Caminhão Designado</div>
+          <div class="label"><i class="fa-solid fa-truck"></i> Caminhão Designado</div>
           <div class="val">${truckDesc}</div>
         </div>
         <div class="my-detail-item">
-          <div class="label">Sua Dupla / Parceiro</div>
+          <div class="label"><i class="fa-solid fa-user-group"></i> Sua Dupla / Parceiro</div>
           <div class="val">${partnerDesc}</div>
         </div>
         <div class="my-detail-item">
-          <div class="label">Destino / Frente</div>
+          <div class="label"><i class="fa-solid fa-map-location-dot"></i> Destino / Frente</div>
           <div class="val">${destinationDesc}</div>
         </div>
         <div class="my-detail-item">
-          <div class="label">Regime & Horário</div>
+          <div class="label"><i class="fa-solid fa-business-time"></i> Regime & Horário</div>
           <div class="val">${colab.regime || 'Escala 3x3'} • ${stHoje.turno}</div>
         </div>
       </div>
 
       <div style="margin-top: 16px;">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
           <span style="font-size: 0.78rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">
-            Previsão dos Próximos 7 Dias
+            <i class="fa-solid fa-calendar-week"></i> Previsão dos Próximos 7 Dias
           </span>
-          <a href="#scheduleCalendarSection" style="font-size: 0.75rem; color: var(--cyan-neon); text-decoration: none; font-weight: 600;">
-            Ver Mês Completo ↓
+          <a href="#scheduleCalendarSection" style="font-size: 0.75rem; color: var(--hc-green); text-decoration: none; font-weight: 700;">
+            <i class="fa-solid fa-calendar-days"></i> Ver Meu Mês Completo Abaixo ↓
           </a>
         </div>
         <div class="my-week-timeline">
@@ -967,7 +1238,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (btnTrocar) {
       btnTrocar.addEventListener("click", () => {
         localStorage.removeItem("escala_meu_colaborador_id");
-        showToast("Seleção de colaborador desfeita. Escolha outro nome.", "info");
+        state.selectedCalendarColabId = null;
+        showToast("Seleção desfeita. Escolha seu nome na lista.", "info");
         renderPersonalSchedule();
         populateCalendarColabSelect();
         renderCalendarGrid();
@@ -986,6 +1258,7 @@ document.addEventListener("DOMContentLoaded", () => {
     populateCalendarColabSelect();
     renderCalendarGrid();
     renderScheduleTable();
+    updateAdminUIMode();
   }
 
   // 8. EVENT LISTENERS & FILTROS
@@ -1134,15 +1407,16 @@ document.addEventListener("DOMContentLoaded", () => {
   document.documentElement.removeAttribute("data-theme");
   localStorage.removeItem("escala_theme");
 
-  // CONTROLE DE ACESSO AO PAINEL DE GESTÃO (LOGIN / SENHA)
-  const btnAdminLink = document.getElementById("btnAdminLink");
+  // CONTROLE DE ACESSO AO PAINEL DE GESTÃO (LOGIN / SESSÃO DE ADMIN)
   const modalLogin = document.getElementById("modalLogin");
   const formLogin = document.getElementById("formLogin");
   const btnCancelLogin = document.getElementById("btnCancelLogin");
   const loginErrorMsg = document.getElementById("loginErrorMsg");
 
-  if (btnAdminLink) {
-    btnAdminLink.addEventListener("click", (e) => {
+  // Botão de ativação do Login / Redirecionamento Admin
+  const triggerBtn = btnAdminTrigger || document.getElementById("btnAdminLink");
+  if (triggerBtn) {
+    triggerBtn.addEventListener("click", (e) => {
       e.preventDefault();
       const user = StorageService.getUsuarioLogado();
       if (user) {
@@ -1150,7 +1424,37 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         if (loginErrorMsg) loginErrorMsg.style.display = "none";
         if (modalLogin) modalLogin.classList.add("open");
+        const emailInput = document.getElementById("loginEmail");
+        if (emailInput) setTimeout(() => emailInput.focus(), 150);
       }
+    });
+  }
+
+  // Alternadores da Barra de Sessão do Admin
+  if (btnAdminViewIndividual) {
+    btnAdminViewIndividual.addEventListener("click", () => {
+      state.adminViewMode = "individual";
+      updateAdminUIMode();
+      showToast("Exibindo visão individual do colaborador.", "info");
+    });
+  }
+
+  if (btnAdminViewFull) {
+    btnAdminViewFull.addEventListener("click", () => {
+      state.adminViewMode = "full";
+      updateAdminUIMode();
+      renderAll();
+      showToast("Controle geral e métricas operacionais liberados.", "success");
+    });
+  }
+
+  if (btnAdminLogout) {
+    btnAdminLogout.addEventListener("click", () => {
+      StorageService.logout();
+      state.adminViewMode = "individual";
+      updateAdminUIMode();
+      renderAll();
+      showToast("Sessão de gestor encerrada com sucesso.", "info");
     });
   }
 
@@ -1176,10 +1480,11 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         const res = await StorageService.autenticarAdmin(email, senha);
         if (res.success) {
-          showToast(`Bem-vindo, ${res.user.nome}! Redirecionando...`, "success");
-          setTimeout(() => {
-            window.location.href = "admin.html";
-          }, 500);
+          showToast(`Bem-vindo(a), ${res.user.nome}! Controle operacional liberado.`, "success");
+          if (modalLogin) modalLogin.classList.remove("open");
+          state.adminViewMode = "full";
+          updateAdminUIMode();
+          renderAll();
         } else {
           if (loginErrorMsg) {
             loginErrorMsg.textContent = res.error || "E-mail ou senha incorretos.";

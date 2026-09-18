@@ -2019,6 +2019,290 @@ body::before {
   box-shadow: 0 0 0 3px rgba(0, 166, 81, 0.12);
 }
 
+/* ==========================================================================
+   BARRA DE SESSÃO DA LIDERANÇA / ADMIN (ESCALA.HTML)
+   ========================================================================== */
+
+.admin-session-bar {
+  background: linear-gradient(135deg, #182b1d 0%, #0d1e11 100%);
+  color: #ffffff;
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  border: 1px solid #2d6a3e;
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-session-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: #e2f5e8;
+}
+
+.admin-session-badge {
+  background: var(--hc-green);
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.admin-session-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-view-toggle {
+  display: inline-flex;
+  background: rgba(255, 255, 255, 0.10);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+  gap: 4px;
+}
+
+.admin-view-btn {
+  background: transparent;
+  border: none;
+  color: #a7f3d0;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: calc(var(--radius-sm) - 2px);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.admin-view-btn:hover {
+  color: #ffffff;
+}
+
+.admin-view-btn.active {
+  background: var(--hc-green);
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 166, 81, 0.35);
+}
+
+/* ==========================================================================
+   AUTOCOMPLETE / BUSCA DE COLABORADOR COM DIGITAÇÃO
+   ========================================================================== */
+
+.colab-search-container {
+  position: relative;
+  width: 100%;
+}
+
+.colab-search-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.colab-search-input-wrap .search-icon {
+  position: absolute;
+  left: 14px;
+  color: var(--hc-green);
+  font-size: 0.95rem;
+  pointer-events: none;
+}
+
+.colab-search-input {
+  width: 100%;
+  padding: 12px 38px 12px 42px;
+  background: #ffffff;
+  border: 2px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-main);
+  outline: none;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.colab-search-input:focus {
+  border-color: var(--hc-green);
+  box-shadow: 0 0 0 4px rgba(0, 166, 81, 0.15);
+}
+
+.colab-search-clear {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 6px;
+  font-size: 0.9rem;
+  display: none;
+  border-radius: 50%;
+}
+
+.colab-search-clear:hover {
+  color: var(--coral-neon);
+  background: #fef2f2;
+}
+
+.colab-suggestions-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  max-height: 280px;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  z-index: 100;
+  display: none;
+}
+
+.colab-suggestions-list.open {
+  display: block;
+}
+
+.colab-suggestion-item {
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #f2f7f4;
+  transition: background 0.15s;
+}
+
+.colab-suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.colab-suggestion-item:hover,
+.colab-suggestion-item.active {
+  background: var(--hc-green-light);
+}
+
+.colab-suggestion-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.colab-suggestion-meta {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+.colab-suggestion-badges {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* Grade de Toque Rápido para Escolha de Colaborador */
+.colab-quick-container {
+  margin-top: 14px;
+}
+
+.colab-quick-filter-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.colab-quick-tab {
+  background: #f1f5f3;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.colab-quick-tab.active {
+  background: var(--hc-green);
+  color: #ffffff;
+  border-color: var(--hc-green);
+}
+
+.colab-quick-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 8px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 2px;
+}
+
+.colab-quick-card {
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  text-align: left;
+}
+
+.colab-quick-card:hover, .colab-quick-card:active {
+  border-color: var(--hc-green);
+  background: var(--hc-green-light);
+  transform: translateY(-1px);
+}
+
+.colab-quick-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.colab-quick-name {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.colab-quick-meta {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-top: 2px;
+}
+
+.colab-quick-arrow {
+  color: var(--hc-green);
+  font-size: 0.80rem;
+  flex-shrink: 0;
+}
+
 /* Card Ativo do Colaborador */
 .my-card-content {
   display: grid;
@@ -2167,3 +2451,99 @@ body::before {
   background: rgba(100, 116, 139, 0.10);
   color: var(--text-muted);
 }
+
+/* ==========================================================================
+   POLIMENTO MOBILE EXTRA (RESPONSIVIDADE INDIVIDUAL E TOQUE)
+   ========================================================================== */
+@media (max-width: 680px) {
+  .admin-session-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 10px 14px;
+  }
+
+  .admin-session-info {
+    justify-content: space-between;
+    width: 100%;
+    font-size: 0.78rem;
+  }
+
+  .admin-session-actions {
+    width: 100%;
+    justify-content: space-between;
+    gap: 6px;
+  }
+
+  .admin-view-toggle {
+    flex: 1;
+    display: flex;
+  }
+
+  .admin-view-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 6px 8px;
+    font-size: 0.72rem;
+  }
+
+  .personal-schedule-hero {
+    padding: 16px 14px;
+    margin-bottom: 20px;
+  }
+
+  .personal-hero-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .personal-hero-header #btnTrocarColaborador {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .my-status-box {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .my-status-badge {
+    font-size: 0.92rem;
+    padding: 7px 12px;
+  }
+
+  .my-details-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .my-detail-item .val {
+    font-size: 0.82rem;
+  }
+
+  .colab-quick-grid {
+    grid-template-columns: 1fr;
+    max-height: 240px;
+  }
+
+  .colab-search-input {
+    font-size: 0.88rem;
+    padding: 10px 34px 10px 38px;
+  }
+
+  .colab-search-input-wrap .search-icon {
+    left: 12px;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .my-details-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

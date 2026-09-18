@@ -65,134 +65,165 @@
         <button class="btn btn-glass" id="btnFullscreen" title="Visualização em Tela Cheia">
           <i class="fa-solid fa-expand"></i> Tela Cheia
         </button>
-        <button class="btn btn-cyan" id="btnAdminLink" title="Acessar o Painel Administrativo de Efetivo e Escala">
-          <i class="fa-solid fa-gear"></i> Painel de Gestão
+        <button class="btn btn-cyan" id="btnAdminTrigger" title="Acesso restrito para Liderança / Supervisores">
+          <i class="fa-solid fa-lock" id="iconAdminTrigger"></i> <span id="txtAdminTrigger">Liderança / Admin</span>
         </button>
       </div>
     </header>
 
-    <!-- ==================== MINHA ESCALA (CONSULTA PESSOAL SALVA NO CELULAR) ==================== -->
-    <section class="personal-schedule-hero" id="personalScheduleHero">
-      <!-- Renderizado dinamicamente pelo app.js -->
-    </section>
-
-    <!-- ==================== BANNER DE MÉTRICAS / STATS ==================== -->
-    <section class="stats-grid">
-      <div class="stat-card stat-cyan">
-        <div class="stat-header">
-          <span class="stat-title">Efetivo Total</span>
-          <span class="stat-icon"><i class="fa-solid fa-users"></i></span>
-        </div>
-        <div class="stat-value" id="statTotalEfetivo">36</div>
-        <div class="stat-subtext">Colaboradores registrados</div>
+    <!-- ==================== BARRA DE SESSÃO DA LIDERANÇA / ADMIN ==================== -->
+    <div id="adminSessionBar" class="admin-session-bar" style="display: none;">
+      <div class="admin-session-info">
+        <span class="admin-session-badge"><i class="fa-solid fa-shield-halved"></i> Sessão Gestor</span>
+        <span>Conectado: <strong id="adminSessionEmail">narcisofelizardo@gmail.com</strong></span>
       </div>
-
-      <div class="stat-card stat-emerald">
-        <div class="stat-header">
-          <span class="stat-title">Em Turno Hoje</span>
-          <span class="stat-icon"><i class="fa-solid fa-bolt"></i></span>
+      <div class="admin-session-actions">
+        <div class="admin-view-toggle">
+          <button class="admin-view-btn active" id="btnAdminViewIndividual" type="button">
+            <i class="fa-solid fa-user"></i> Visão Individual
+          </button>
+          <button class="admin-view-btn" id="btnAdminViewFull" type="button">
+            <i class="fa-solid fa-chart-pie"></i> Controle Geral (Telão)
+          </button>
         </div>
-        <div class="stat-value" id="statEmTurno">--</div>
-        <div class="stat-subtext">Escalados (3x3 + ADM ativo)</div>
-      </div>
-
-      <div class="stat-card stat-amber">
-        <div class="stat-header">
-          <span class="stat-title">Caminhões em Operação</span>
-          <span class="stat-icon"><i class="fa-solid fa-truck"></i></span>
-        </div>
-        <div class="stat-value" id="statCaminhoesAtivos">--</div>
-        <div class="stat-subtext">Frente de mina & usina</div>
-      </div>
-
-      <div class="stat-card stat-purple">
-        <div class="stat-header">
-          <span class="stat-title">Folgas & Descanso</span>
-          <span class="stat-icon"><i class="fa-solid fa-umbrella-beach"></i></span>
-        </div>
-        <div class="stat-value" id="statFolgas">--</div>
-        <div class="stat-subtext">Ciclo 3x3 folga / férias</div>
-      </div>
-    </section>
-
-    <!-- ==================== BARRA DE FILTROS & SELETOR DE ÁREA ==================== -->
-    <section class="filter-control-bar">
-      <div class="area-tabs">
-        <button class="area-tab active" data-area="todas">
-          <i class="fa-solid fa-globe"></i> Todas as Áreas <span class="area-badge-count" id="badgeCountTodas">36</span>
-        </button>
-        <button class="area-tab" data-area="sossego">
-          <i class="fa-solid fa-mountain"></i> Área Sossego (3 Caminhões) <span class="area-badge-count" id="badgeCountSossego">18</span>
-        </button>
-        <button class="area-tab tab-salobo" data-area="salobo">
-          <i class="fa-solid fa-industry"></i> Área Salobo (4 Caminhões) <span class="area-badge-count" id="badgeCountSalobo">18</span>
+        <a href="admin.html" class="btn btn-cyan" style="padding: 6px 12px; font-size: 0.78rem;">
+          <i class="fa-solid fa-sliders"></i> Painel Admin
+        </a>
+        <button class="btn btn-glass" id="btnAdminLogout" type="button" style="padding: 6px 10px; font-size: 0.78rem; color: var(--coral-neon);" title="Encerrar sessão de gestor">
+          <i class="fa-solid fa-right-from-bracket"></i>
         </button>
       </div>
+    </div>
 
-      <div class="search-box">
-        <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
-        <input type="text" id="searchInput" class="search-input" placeholder="Buscar colaborador, cargo ou matrícula...">
-      </div>
-    </section>
+    <!-- ==================== VISÃO DO USUÁRIO COMUM (INDIVIDUALIZADA) ==================== -->
+    <div id="viewUsuarioComum">
+      <!-- MINHA ESCALA (CONSULTA PESSOAL SALVA NO CELULAR) -->
+      <section class="personal-schedule-hero" id="personalScheduleHero">
+        <!-- Renderizado dinamicamente pelo app.js (Campo de busca por digitação e card pessoal) -->
+      </section>
+    </div>
 
-    <!-- ==================== FROTAS & DUPLAS OPERACIONAIS ==================== -->
-    <section>
-      <div class="section-title-wrap">
-        <h2 class="section-title">
-          <i class="fa-solid fa-truck"></i> Caminhões & Duplas Operacionais Ativas
-        </h2>
-        <span class="section-badge">FROTA EM OPERAÇÃO</span>
-      </div>
-
-      <div class="trucks-grid" id="trucksGrid">
-        <!-- Renderizado dinamicamente pelo app.js -->
-      </div>
-    </section>
-
-    <!-- ==================== QUADRO OPERACIONAL DE HOJE ==================== -->
-    <section>
-      <div class="section-title-wrap">
-        <h2 class="section-title">
-          <i class="fa-solid fa-clipboard-list"></i> Efetivo Operacional do Dia
-        </h2>
-        <span class="section-badge">STATUS HOJE</span>
-      </div>
-
-      <div class="roster-today-grid">
-        <!-- Coluna 1: 3x3 em Turno -->
-        <div class="roster-card">
-          <div class="roster-card-header">
-            <h3><i class="fa-solid fa-bolt"></i> Escala 3x3 em Turno</h3>
-            <span style="font-size:0.75rem; color:var(--hc-green); font-weight:700;">Trabalho Ativo</span>
+    <!-- ==================== CONTROLE COMPLETO OPERACIONAL (RESTRITO A ADMINS) ==================== -->
+    <div id="viewControleCompletoAdmin" style="display: none;">
+      
+      <!-- BANNER DE MÉTRICAS GLOBAIS DA EMPRESA -->
+      <section class="stats-grid">
+        <div class="stat-card stat-cyan">
+          <div class="stat-header">
+            <span class="stat-title">Efetivo Total</span>
+            <span class="stat-icon"><i class="fa-solid fa-users"></i></span>
           </div>
-          <div class="roster-list" id="roster3x3List">
-            <!-- Renderizado dinamicamente -->
-          </div>
+          <div class="stat-value" id="statTotalEfetivo">36</div>
+          <div class="stat-subtext">Colaboradores registrados</div>
         </div>
 
-        <!-- Coluna 2: Administrativo / Apoio -->
-        <div class="roster-card">
-          <div class="roster-card-header">
-            <h3><i class="fa-solid fa-building"></i> Equipe Administrativa & Apoio</h3>
-            <span style="font-size:0.75rem; color:var(--emerald-neon); font-weight:700;">Regime ADM</span>
+        <div class="stat-card stat-emerald">
+          <div class="stat-header">
+            <span class="stat-title">Em Turno Hoje</span>
+            <span class="stat-icon"><i class="fa-solid fa-bolt"></i></span>
           </div>
-          <div class="roster-list" id="rosterAdmList">
-            <!-- Renderizado dinamicamente -->
-          </div>
+          <div class="stat-value" id="statEmTurno">--</div>
+          <div class="stat-subtext">Escalados (3x3 + ADM ativo)</div>
         </div>
 
-        <!-- Coluna 3: Folgas e Afastamentos -->
-        <div class="roster-card">
-          <div class="roster-card-header">
-            <h3><i class="fa-solid fa-umbrella-beach"></i> Folgas, Férias & Licenças</h3>
-            <span style="font-size:0.75rem; color:var(--purple-neon); font-weight:700;">Descanso</span>
+        <div class="stat-card stat-amber">
+          <div class="stat-header">
+            <span class="stat-title">Caminhões em Operação</span>
+            <span class="stat-icon"><i class="fa-solid fa-truck"></i></span>
           </div>
-          <div class="roster-list" id="rosterFolgasList">
-            <!-- Renderizado dinamicamente -->
+          <div class="stat-value" id="statCaminhoesAtivos">--</div>
+          <div class="stat-subtext">Frente de mina & usina</div>
+        </div>
+
+        <div class="stat-card stat-purple">
+          <div class="stat-header">
+            <span class="stat-title">Folgas & Descanso</span>
+            <span class="stat-icon"><i class="fa-solid fa-umbrella-beach"></i></span>
+          </div>
+          <div class="stat-value" id="statFolgas">--</div>
+          <div class="stat-subtext">Ciclo 3x3 folga / férias</div>
+        </div>
+      </section>
+
+      <!-- BARRA DE FILTROS & SELETOR DE ÁREA -->
+      <section class="filter-control-bar">
+        <div class="area-tabs">
+          <button class="area-tab active" data-area="todas">
+            <i class="fa-solid fa-globe"></i> Todas as Áreas <span class="area-badge-count" id="badgeCountTodas">36</span>
+          </button>
+          <button class="area-tab" data-area="sossego">
+            <i class="fa-solid fa-mountain"></i> Área Sossego (3 Caminhões) <span class="area-badge-count" id="badgeCountSossego">18</span>
+          </button>
+          <button class="area-tab tab-salobo" data-area="salobo">
+            <i class="fa-solid fa-industry"></i> Área Salobo (4 Caminhões) <span class="area-badge-count" id="badgeCountSalobo">18</span>
+          </button>
+        </div>
+
+        <div class="search-box">
+          <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+          <input type="text" id="searchInput" class="search-input" placeholder="Buscar colaborador, cargo ou matrícula...">
+        </div>
+      </section>
+
+      <!-- FROTAS & DUPLAS OPERACIONAIS -->
+      <section>
+        <div class="section-title-wrap">
+          <h2 class="section-title">
+            <i class="fa-solid fa-truck"></i> Caminhões & Duplas Operacionais Ativas
+          </h2>
+          <span class="section-badge">FROTA EM OPERAÇÃO</span>
+        </div>
+
+        <div class="trucks-grid" id="trucksGrid">
+          <!-- Renderizado dinamicamente pelo app.js -->
+        </div>
+      </section>
+
+      <!-- QUADRO OPERACIONAL DE HOJE (36 COLABORADORES) -->
+      <section>
+        <div class="section-title-wrap">
+          <h2 class="section-title">
+            <i class="fa-solid fa-clipboard-list"></i> Efetivo Operacional do Dia
+          </h2>
+          <span class="section-badge">STATUS HOJE</span>
+        </div>
+
+        <div class="roster-today-grid">
+          <!-- Coluna 1: 3x3 em Turno -->
+          <div class="roster-card">
+            <div class="roster-card-header">
+              <h3><i class="fa-solid fa-bolt"></i> Escala 3x3 em Turno</h3>
+              <span style="font-size:0.75rem; color:var(--hc-green); font-weight:700;">Trabalho Ativo</span>
+            </div>
+            <div class="roster-list" id="roster3x3List">
+              <!-- Renderizado dinamicamente -->
+            </div>
+          </div>
+
+          <!-- Coluna 2: Administrativo / Apoio -->
+          <div class="roster-card">
+            <div class="roster-card-header">
+              <h3><i class="fa-solid fa-building"></i> Equipe Administrativa & Apoio</h3>
+              <span style="font-size:0.75rem; color:var(--emerald-neon); font-weight:700;">Regime ADM</span>
+            </div>
+            <div class="roster-list" id="rosterAdmList">
+              <!-- Renderizado dinamicamente -->
+            </div>
+          </div>
+
+          <!-- Coluna 3: Folgas e Afastamentos -->
+          <div class="roster-card">
+            <div class="roster-card-header">
+              <h3><i class="fa-solid fa-umbrella-beach"></i> Folgas, Férias & Licenças</h3>
+              <span style="font-size:0.75rem; color:var(--purple-neon); font-weight:700;">Descanso</span>
+            </div>
+            <div class="roster-list" id="rosterFolgasList">
+              <!-- Renderizado dinamicamente -->
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
 
     <!-- ==================== GRADE MENSAL DE ESCALA ==================== -->
     <section class="schedule-calendar-section" id="scheduleCalendarSection">
@@ -204,8 +235,8 @@
           <button class="btn btn-glass" id="currentMonthBtn">Mês Atual</button>
         </div>
 
-        <!-- Alternador entre Calendário Mensal e Tabela Geral -->
-        <div class="calendar-view-switcher">
+        <!-- Alternador entre Calendário Mensal e Tabela Geral (Apenas Administradores) -->
+        <div class="calendar-view-switcher" id="calendarViewSwitcher" style="display: none;">
           <button class="view-switch-btn active" id="btnViewCalendar" title="Visualização em Formato de Calendário Mensal">
             <i class="fa-solid fa-calendar-days"></i> Formato Calendário
           </button>
@@ -241,8 +272,8 @@
       <!-- ==================== VISÃO 1: FORMATO DE CALENDÁRIO MENSAL ==================== -->
       <div id="calendarGridContainer">
         
-        <!-- Barra de Seleção de Colaborador -->
-        <div class="calendar-colab-picker-bar">
+        <!-- Barra de Seleção de Colaborador (Liderança / Administrador) -->
+        <div class="calendar-colab-picker-bar" id="calendarColabPickerBar" style="display: none;">
           <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex: 1;">
             <label for="calendarColabSelect" style="font-size: 0.85rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 6px;">
               <i class="fa-solid fa-user" style="color:var(--hc-green);"></i> Escala do Colaborador:
